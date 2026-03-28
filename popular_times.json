@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-03-28T16:47:34.250122",
+    "generated": "2026-03-28T16:51:20.706020",
     "radius_walk": 500,
     "radius_car": 1500
   },
@@ -14,7 +14,7 @@
     "walk_places_count": 0,
     "car_places_count": 0,
     "heatmap_points": [],
-    "collected_at": "2026-03-28T16:47:43.246813"
+    "collected_at": "2026-03-28T16:51:26.055424"
   },
   "Дубно ЛІТАЧОК": {
     "peak": 0,
@@ -26,6 +26,6 @@
     "walk_places_count": 0,
     "car_places_count": 0,
     "heatmap_points": [],
-    "collected_at": "2026-03-28T16:47:51.677998"
+    "collected_at": "2026-03-28T16:51:31.261258"
   }
 }
