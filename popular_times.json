@@ -1,17 +1,31 @@
 {
   "_meta": {
-    "generated": "2026-03-28T14:54:31.833241"
+    "generated": "2026-03-28T15:45:24.198553",
+    "radius_walk": 500,
+    "radius_car": 1500
   },
   "Дубно КІНО": {
     "peak": 0,
     "morning": 0,
     "evening": 0,
-    "weekend": 0
+    "weekend": 0,
+    "walk_radius": 500,
+    "car_radius": 1500,
+    "walk_places_count": 0,
+    "car_places_count": 0,
+    "heatmap_points": [],
+    "collected_at": "2026-03-28T15:45:33.232639"
   },
   "Дубно ЛІТАЧОК": {
     "peak": 0,
     "morning": 0,
     "evening": 0,
-    "weekend": 0
+    "weekend": 0,
+    "walk_radius": 500,
+    "car_radius": 1500,
+    "walk_places_count": 0,
+    "car_places_count": 0,
+    "heatmap_points": [],
+    "collected_at": "2026-03-28T15:45:41.760953"
   }
 }
