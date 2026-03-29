@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-03-29T12:57:28.767449",
+    "generated": "2026-03-29T13:58:48.427307",
     "radius_walk": 500,
     "radius_car": 1000
   },
@@ -215,7 +215,9 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-03-29T12:57:36.260588"
+    "collected_at": "2026-03-29T13:58:56.051388",
+    "population_walk": 809,
+    "population_car": 2422
   },
   "Бурштин ринок": {
     "peak": 36,
@@ -748,6 +750,8 @@
         "in_walk_radius": false
       }
     ],
-    "collected_at": "2026-03-29T12:57:43.637812"
+    "collected_at": "2026-03-29T13:59:04.846341",
+    "population_walk": 510,
+    "population_car": 5776
   }
 }
