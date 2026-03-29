@@ -1,19 +1,29 @@
 {
   "_meta": {
-    "generated": "2026-03-29T17:24:47.074285",
+    "generated": "2026-03-29T18:07:42.202096",
     "radius_walk": 500,
-    "radius_car": 1500
+    "radius_car": 2000
   },
-  "ІФ1": {
+  "М1": {
     "peak": 32,
     "morning": 19,
     "evening": 27,
     "weekend": 28,
     "walk_radius": 500,
-    "car_radius": 1500,
+    "car_radius": 2000,
     "walk_places_count": 24,
-    "car_places_count": 55,
+    "car_places_count": 56,
     "heatmap_points": [
+      {
+        "lat": 48.93070789999999,
+        "lon": 24.7445838,
+        "name": "Epicentr K",
+        "rating": 4.2,
+        "reviews": 8951,
+        "type": "shopping_mall",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
       {
         "lat": 48.9241453,
         "lon": 24.7362075,
@@ -135,21 +145,21 @@
         "in_walk_radius": false
       },
       {
-        "lat": 48.9143298,
-        "lon": 24.7469428,
-        "name": "Готельно-ресторанний комплекс Mon Ami",
-        "rating": 4.5,
-        "reviews": 417,
+        "lat": 48.9236686,
+        "lon": 24.7235774,
+        "name": "Chicken Hut",
+        "rating": 3.8,
+        "reviews": 4252,
         "type": "restaurant",
         "weight": 1.0,
         "in_walk_radius": false
       },
       {
-        "lat": 48.91530339999999,
-        "lon": 24.7490702,
-        "name": "Ресторан Virtuoso: доставка піци та страв",
+        "lat": 48.9240966,
+        "lon": 24.719885,
+        "name": "Grande Pizzeria",
         "rating": 4.5,
-        "reviews": 124,
+        "reviews": 2011,
         "type": "restaurant",
         "weight": 1.0,
         "in_walk_radius": false
@@ -165,31 +175,21 @@
         "in_walk_radius": false
       },
       {
-        "lat": 48.9137138,
-        "lon": 24.7371518,
-        "name": "кафе Каліфорнія",
-        "rating": 0,
-        "reviews": 0,
+        "lat": 48.9251032,
+        "lon": 24.72357310000001,
+        "name": "Syta Lozhka",
+        "rating": 3.8,
+        "reviews": 1062,
         "type": "cafe",
-        "weight": 0.1,
-        "in_walk_radius": true
-      },
-      {
-        "lat": 48.917124,
-        "lon": 24.7339717,
-        "name": "3:16 Khrystyyansʹke Kafe",
-        "rating": 5,
-        "reviews": 2,
-        "type": "cafe",
-        "weight": 0.549,
+        "weight": 1.0,
         "in_walk_radius": false
       },
       {
-        "lat": 48.9161916,
-        "lon": 24.7490365,
-        "name": "YOUR COFFEE",
-        "rating": 4.5,
-        "reviews": 22,
+        "lat": 48.92479420000001,
+        "lon": 24.71764199999999,
+        "name": "Didi Huli",
+        "rating": 4.6,
+        "reviews": 2437,
         "type": "cafe",
         "weight": 1.0,
         "in_walk_radius": false
@@ -265,13 +265,53 @@
         "in_walk_radius": true
       },
       {
-        "lat": 48.9135007,
-        "lon": 24.7584196,
-        "name": "Срібна Лавка",
-        "rating": 0,
-        "reviews": 0,
+        "lat": 48.92364239999999,
+        "lon": 24.7235788,
+        "name": "Apartments On Zaliznychna 49",
+        "rating": 3.4,
+        "reviews": 5,
         "type": "market",
-        "weight": 0.1,
+        "weight": 0.609,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 48.9297479,
+        "lon": 24.7343919,
+        "name": "Youth",
+        "rating": 4.6,
+        "reviews": 58,
+        "type": "gym",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 48.9127848,
+        "lon": 24.7153678,
+        "name": "Klub Aktyvnoho Vidpochynku Varta",
+        "rating": 4.7,
+        "reviews": 15,
+        "type": "gym",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 48.9315394,
+        "lon": 24.7357315,
+        "name": "Forum",
+        "rating": 4.7,
+        "reviews": 35,
+        "type": "gym",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 48.9188149,
+        "lon": 24.714438,
+        "name": "F3 | Маркет здорового харчування | Спортивне харчування | Вітаміни | Мінерали | БАДИ",
+        "rating": 5,
+        "reviews": 199,
+        "type": "gym",
+        "weight": 1.0,
         "in_walk_radius": false
       },
       {
@@ -285,43 +325,13 @@
         "in_walk_radius": false
       },
       {
-        "lat": 48.9150115,
-        "lon": 24.7348086,
-        "name": "Ivano-Frankivsʹka Federatsiya Shakhiv Shakhmatnyy Klub",
-        "rating": 3.4,
-        "reviews": 13,
-        "type": "gym",
-        "weight": 0.897,
-        "in_walk_radius": false
-      },
-      {
-        "lat": 48.9170475,
-        "lon": 24.7482048,
-        "name": "Гоцканє - фітнес студія",
+        "lat": 48.92360579999999,
+        "lon": 24.7213184,
+        "name": "Туристичне агентство *VISAWAY-TRAVEL *ТзОВ Караван Плюс",
         "rating": 5,
-        "reviews": 36,
-        "type": "gym",
-        "weight": 1.0,
-        "in_walk_radius": false
-      },
-      {
-        "lat": 48.9253276,
-        "lon": 24.742567,
-        "name": "Sportyvnyy Klub Lehion",
-        "rating": 4.9,
-        "reviews": 65,
-        "type": "gym",
-        "weight": 1.0,
-        "in_walk_radius": false
-      },
-      {
-        "lat": 48.92526489999999,
-        "lon": 24.7327012,
-        "name": "Аюрведа",
-        "rating": 4.6,
-        "reviews": 26,
-        "type": "gym",
-        "weight": 1.0,
+        "reviews": 1,
+        "type": "park",
+        "weight": 0.347,
         "in_walk_radius": false
       },
       {
@@ -365,16 +375,6 @@
         "in_walk_radius": false
       },
       {
-        "lat": 48.9261766,
-        "lon": 24.73455,
-        "name": "Zona Vidpochynku",
-        "rating": 0,
-        "reviews": 0,
-        "type": "park",
-        "weight": 0.1,
-        "in_walk_radius": false
-      },
-      {
         "lat": 48.9209062,
         "lon": 24.7391178,
         "name": "Ліцей №19",
@@ -415,9 +415,9 @@
         "in_walk_radius": false
       },
       {
-        "lat": 48.9164738,
-        "lon": 24.7356094,
-        "name": "Ліцей №15",
+        "lat": 48.91990500000001,
+        "lon": 24.7181782,
+        "name": "Ліцей №11",
         "rating": 0,
         "reviews": 0,
         "type": "school",
@@ -439,7 +439,27 @@
         "lon": 24.725093,
         "name": "Proktolohiya Veselovsʹkoho",
         "rating": 4.8,
-        "reviews": 187,
+        "reviews": 188,
+        "type": "hospital",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 48.9314342,
+        "lon": 24.7356739,
+        "name": "Arnika",
+        "rating": 3.7,
+        "reviews": 28,
+        "type": "hospital",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 48.92724380000001,
+        "lon": 24.7226147,
+        "name": "City Polyclinic No5",
+        "rating": 2.6,
+        "reviews": 67,
         "type": "hospital",
         "weight": 1.0,
         "in_walk_radius": false
@@ -452,26 +472,6 @@
         "reviews": 16,
         "type": "hospital",
         "weight": 1.0,
-        "in_walk_radius": false
-      },
-      {
-        "lat": 48.91698419999999,
-        "lon": 24.7335741,
-        "name": "Knp \"Ivano-Frankivsʹkyy Oblasnyy Klinichnyy Tsentr Paliatyvnoyi Dopomohy Ivano-Frankivsʹkoyi Oblasnoyi Rady\"",
-        "rating": 5,
-        "reviews": 1,
-        "type": "hospital",
-        "weight": 0.347,
-        "in_walk_radius": false
-      },
-      {
-        "lat": 48.9157424,
-        "lon": 24.7320474,
-        "name": "Медичний дієтологічний центр - Клініка Доктора Бровко",
-        "rating": 0,
-        "reviews": 0,
-        "type": "hospital",
-        "weight": 0.1,
         "in_walk_radius": false
       },
       {
@@ -495,6 +495,16 @@
         "in_walk_radius": false
       },
       {
+        "lat": 48.9178422,
+        "lon": 24.7201923,
+        "name": "Ekspres-Bank",
+        "rating": 0,
+        "reviews": 0,
+        "type": "bank",
+        "weight": 0.1,
+        "in_walk_radius": false
+      },
+      {
         "lat": 48.9177753,
         "lon": 24.7210024,
         "name": "UniCredit Bank",
@@ -505,13 +515,13 @@
         "in_walk_radius": false
       },
       {
-        "lat": 48.9178422,
-        "lon": 24.7201923,
-        "name": "Ekspres-Bank",
-        "rating": 0,
-        "reviews": 0,
+        "lat": 48.92594299999999,
+        "lon": 24.72127039999999,
+        "name": "Privatbank",
+        "rating": 2.7,
+        "reviews": 14,
         "type": "bank",
-        "weight": 0.1,
+        "weight": 0.731,
         "in_walk_radius": false
       },
       {
@@ -535,6 +545,26 @@
         "in_walk_radius": false
       },
       {
+        "lat": 48.9292018,
+        "lon": 24.7346355,
+        "name": "\"OlVet\" in Youth 55",
+        "rating": 3.8,
+        "reviews": 461,
+        "type": "pharmacy",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 48.9256268,
+        "lon": 24.7223483,
+        "name": "Med-Servys",
+        "rating": 3.4,
+        "reviews": 26,
+        "type": "pharmacy",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
         "lat": 48.9157906,
         "lon": 24.7350224,
         "name": "Аптека «Подорожник»",
@@ -543,36 +573,34 @@
         "type": "pharmacy",
         "weight": 1.0,
         "in_walk_radius": false
-      },
-      {
-        "lat": 48.9154926,
-        "lon": 24.734609,
-        "name": "Apteka Ants",
-        "rating": 3,
-        "reviews": 2,
-        "type": "pharmacy",
-        "weight": 0.33,
-        "in_walk_radius": false
-      },
-      {
-        "lat": 48.91592789999999,
-        "lon": 24.7341645,
-        "name": "Аптека «Подорожник»",
-        "rating": 5,
-        "reviews": 7,
-        "type": "pharmacy",
-        "weight": 1.0,
-        "in_walk_radius": false
       }
     ],
-    "collected_at": "2026-03-29T17:24:54.194484",
+    "collected_at": "2026-03-29T18:07:49.920185",
     "population_walk": 6503,
-    "population_car": 36562,
+    "population_car": 61274,
     "population_heatmap": [
       {
         "lat": 48.92497,
         "lon": 24.73497,
         "pop": 5791,
+        "in_walk": false
+      },
+      {
+        "lat": 48.92803,
+        "lon": 24.72295,
+        "pop": 5702,
+        "in_walk": false
+      },
+      {
+        "lat": 48.92981,
+        "lon": 24.74519,
+        "pop": 1804,
+        "in_walk": false
+      },
+      {
+        "lat": 48.90125,
+        "lon": 24.74035,
+        "pop": 1151,
         "in_walk": false
       },
       {
@@ -612,6 +640,12 @@
         "in_walk": false
       },
       {
+        "lat": 48.91093,
+        "lon": 24.76079,
+        "pop": 1057,
+        "in_walk": false
+      },
+      {
         "lat": 48.914,
         "lon": 24.74878,
         "pop": 1529,
@@ -624,20 +658,38 @@
         "in_walk": false
       },
       {
+        "lat": 48.90738,
+        "lon": 24.71632,
+        "pop": 6299,
+        "in_walk": false
+      },
+      {
         "lat": 48.91222,
         "lon": 24.72654,
         "pop": 5362,
         "in_walk": false
+      },
+      {
+        "lat": 48.91529,
+        "lon": 24.71453,
+        "pop": 8395,
+        "in_walk": false
+      },
+      {
+        "lat": 48.92674,
+        "lon": 24.75721,
+        "pop": 304,
+        "in_walk": false
       }
     ]
   },
-  "ІФ2": {
+  "М2": {
     "peak": 45,
     "morning": 27,
     "evening": 38,
     "weekend": 40,
     "walk_radius": 500,
-    "car_radius": 1500,
+    "car_radius": 2000,
     "walk_places_count": 56,
     "car_places_count": 58,
     "heatmap_points": [
@@ -752,16 +804,6 @@
         "in_walk_radius": true
       },
       {
-        "lat": 48.92354220000001,
-        "lon": 24.70981370000001,
-        "name": "Atrium",
-        "rating": 4.5,
-        "reviews": 440,
-        "type": "restaurant",
-        "weight": 1.0,
-        "in_walk_radius": true
-      },
-      {
         "lat": 48.92286209999999,
         "lon": 24.72927099999999,
         "name": "Stanislavsky Dvir",
@@ -770,6 +812,16 @@
         "type": "restaurant",
         "weight": 1.0,
         "in_walk_radius": false
+      },
+      {
+        "lat": 48.92354220000001,
+        "lon": 24.70981370000001,
+        "name": "Atrium",
+        "rating": 4.5,
+        "reviews": 440,
+        "type": "restaurant",
+        "weight": 1.0,
+        "in_walk_radius": true
       },
       {
         "lat": 48.9199602,
@@ -812,21 +864,21 @@
         "in_walk_radius": true
       },
       {
+        "lat": 48.91577979999999,
+        "lon": 24.7050054,
+        "name": "Londa",
+        "rating": 3.8,
+        "reviews": 90,
+        "type": "cafe",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
         "lat": 48.92350870000001,
         "lon": 24.7103099,
         "name": "Delikates",
         "rating": 4.1,
         "reviews": 803,
-        "type": "cafe",
-        "weight": 1.0,
-        "in_walk_radius": true
-      },
-      {
-        "lat": 48.923604,
-        "lon": 24.709482,
-        "name": "Bize",
-        "rating": 4.5,
-        "reviews": 340,
         "type": "cafe",
         "weight": 1.0,
         "in_walk_radius": true
@@ -862,24 +914,24 @@
         "in_walk_radius": false
       },
       {
-        "lat": 48.924848,
-        "lon": 24.710694,
-        "name": "TsUM",
-        "rating": 4.2,
-        "reviews": 21,
+        "lat": 48.925113,
+        "lon": 24.698234,
+        "name": "Vul. Dovha-Belʹvedersʹka",
+        "rating": 0,
+        "reviews": 0,
         "type": "transit_station",
-        "weight": 1.0,
-        "in_walk_radius": true
+        "weight": 0.1,
+        "in_walk_radius": false
       },
       {
-        "lat": 48.925369,
-        "lon": 24.709938,
-        "name": "TsUM",
-        "rating": 3.9,
-        "reviews": 13,
+        "lat": 48.9179245,
+        "lon": 24.722333,
+        "name": "Kinoteatr \"Kosmos\"",
+        "rating": 4,
+        "reviews": 1,
         "type": "transit_station",
-        "weight": 1.0,
-        "in_walk_radius": true
+        "weight": 0.277,
+        "in_walk_radius": false
       },
       {
         "lat": 48.9200616,
@@ -982,6 +1034,16 @@
         "in_walk_radius": false
       },
       {
+        "lat": 48.9105605,
+        "lon": 24.6959151,
+        "name": "Shevchenko park",
+        "rating": 4.7,
+        "reviews": 7982,
+        "type": "park",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
         "lat": 48.9241817,
         "lon": 24.7130262,
         "name": "Helikopter",
@@ -1012,14 +1074,14 @@
         "in_walk_radius": true
       },
       {
-        "lat": 48.922633,
-        "lon": 24.711117,
-        "name": "Misʹkyy Park Kulʹtury Ta Vidpochynku Im. T.shevchenka",
+        "lat": 48.91043,
+        "lon": 24.7064996,
+        "name": "Ліцей № 12 імені Івана Франка Івано-Франківської міської ради",
         "rating": 0,
         "reviews": 0,
-        "type": "park",
+        "type": "school",
         "weight": 0.1,
-        "in_walk_radius": true
+        "in_walk_radius": false
       },
       {
         "lat": 48.9208715,
@@ -1062,16 +1124,6 @@
         "in_walk_radius": true
       },
       {
-        "lat": 48.92785999999999,
-        "lon": 24.71202439999999,
-        "name": "Web-студія. IT-group.",
-        "rating": 4.7,
-        "reviews": 20,
-        "type": "school",
-        "weight": 1.0,
-        "in_walk_radius": true
-      },
-      {
         "lat": 48.929478,
         "lon": 24.7028232,
         "name": "City Polyclinic № 2",
@@ -1079,6 +1131,26 @@
         "reviews": 87,
         "type": "hospital",
         "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 48.91581009999999,
+        "lon": 24.7042949,
+        "name": "Medychnyy Tsentr Med-Atlant. Korpus 1",
+        "rating": 4.4,
+        "reviews": 719,
+        "type": "hospital",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 48.9200759,
+        "lon": 24.6972619,
+        "name": "Akvamarin, Medichniy Tsentr",
+        "rating": 4.5,
+        "reviews": 4,
+        "type": "hospital",
+        "weight": 0.724,
         "in_walk_radius": false
       },
       {
@@ -1100,26 +1172,6 @@
         "type": "hospital",
         "weight": 1.0,
         "in_walk_radius": true
-      },
-      {
-        "lat": 48.92231659999999,
-        "lon": 24.7149039,
-        "name": "Medhouse",
-        "rating": 4.8,
-        "reviews": 1509,
-        "type": "hospital",
-        "weight": 1.0,
-        "in_walk_radius": true
-      },
-      {
-        "lat": 48.92473280000001,
-        "lon": 24.7165054,
-        "name": "Медичний центр \"Оксфорд Медікал Івано-Франківськ\"",
-        "rating": 4.1,
-        "reviews": 360,
-        "type": "hospital",
-        "weight": 1.0,
-        "in_walk_radius": false
       },
       {
         "lat": 48.9256271,
@@ -1152,16 +1204,6 @@
         "in_walk_radius": true
       },
       {
-        "lat": 48.929496,
-        "lon": 24.7127458,
-        "name": "Kredobank",
-        "rating": 3.1,
-        "reviews": 29,
-        "type": "bank",
-        "weight": 1.0,
-        "in_walk_radius": false
-      },
-      {
         "lat": 48.9178422,
         "lon": 24.7201923,
         "name": "Ekspres-Bank",
@@ -1169,6 +1211,16 @@
         "reviews": 0,
         "type": "bank",
         "weight": 0.1,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 48.929496,
+        "lon": 24.7127458,
+        "name": "Kredobank",
+        "rating": 3.1,
+        "reviews": 29,
+        "type": "bank",
+        "weight": 1.0,
         "in_walk_radius": false
       },
       {
@@ -1212,24 +1264,42 @@
         "in_walk_radius": false
       },
       {
-        "lat": 48.9195769,
-        "lon": 24.7129149,
-        "name": "Imperial Skin Beauty Medicals",
-        "rating": 0,
-        "reviews": 0,
+        "lat": 48.9292018,
+        "lon": 24.7346355,
+        "name": "\"OlVet\" in Youth 55",
+        "rating": 3.8,
+        "reviews": 461,
         "type": "pharmacy",
-        "weight": 0.1,
+        "weight": 1.0,
         "in_walk_radius": false
       }
     ],
-    "collected_at": "2026-03-29T17:25:01.586944",
+    "collected_at": "2026-03-29T18:07:57.433619",
     "population_walk": 11350,
-    "population_car": 68955,
+    "population_car": 109079,
     "population_heatmap": [
+      {
+        "lat": 48.92141,
+        "lon": 24.69049,
+        "pop": 4205,
+        "in_walk": false
+      },
+      {
+        "lat": 48.9135,
+        "lon": 24.69229,
+        "pop": 1841,
+        "in_walk": false
+      },
       {
         "lat": 48.93593,
         "lon": 24.72115,
         "pop": 5625,
+        "in_walk": false
+      },
+      {
+        "lat": 48.92497,
+        "lon": 24.73497,
+        "pop": 5791,
         "in_walk": false
       },
       {
@@ -1239,9 +1309,27 @@
         "in_walk": false
       },
       {
+        "lat": 48.93287,
+        "lon": 24.73317,
+        "pop": 5270,
+        "in_walk": false
+      },
+      {
+        "lat": 48.93899,
+        "lon": 24.70913,
+        "pop": 2707,
+        "in_walk": false
+      },
+      {
         "lat": 48.92625,
         "lon": 24.70071,
         "pop": 9841,
+        "in_walk": false
+      },
+      {
+        "lat": 48.92931,
+        "lon": 24.68869,
+        "pop": 1768,
         "in_walk": false
       },
       {
@@ -1273,6 +1361,24 @@
         "lon": 24.71273,
         "pop": 11350,
         "in_walk": true
+      },
+      {
+        "lat": 48.90738,
+        "lon": 24.71632,
+        "pop": 6299,
+        "in_walk": false
+      },
+      {
+        "lat": 48.91044,
+        "lon": 24.70431,
+        "pop": 6881,
+        "in_walk": false
+      },
+      {
+        "lat": 48.91222,
+        "lon": 24.72654,
+        "pop": 5362,
+        "in_walk": false
       },
       {
         "lat": 48.91529,
