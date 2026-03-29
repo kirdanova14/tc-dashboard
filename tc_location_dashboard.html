@@ -862,6 +862,7 @@ function renderPopularTimesTab() {
     const col = LOC_COLORS[ri % LOC_COLORS.length];
     const ped = pedestrianData[r.name] || {peak:0,morning:0,evening:0,weekend:0};
     const pedScore = getPedScore(r.name);
+    console.log(`DEBUG ${r.name}:`, JSON.stringify({pop_walk: ped.population_walk, pop_car: ped.population_car}));
 
     const section = document.createElement('div');
     section.style.cssText = 'background:white;border:1px solid #e8e8e8;border-radius:12px;padding:20px;margin-bottom:20px';
