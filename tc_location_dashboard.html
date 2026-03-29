@@ -253,6 +253,8 @@ tr:hover td { background: #fafafa; }
         <button class="mctrl-btn" id="btn-manual" onclick="toggleManualMode()" title="Додати об'єкт вручну">✏️ Мої об'єкти</button>
         <div class="mctrl-sep"></div>
         <button class="mctrl-btn" id="btn-construction" onclick="toggleConstructionLayer()" title="Дозволи на будівництво (e-construction, 2022)">🏗️ Будівництво</button>
+        <div class="mctrl-sep"></div>
+        <button class="mctrl-btn" id="btn-pop-heat" onclick="togglePopulationHeat()" title="Теплова карта густоти населення (Kontur 2023)">👥 Населення</button>
       </div>
       <!-- Перемикач часу доби — з'являється коли активна теплова карта популярності -->
       <div id="time-selector" style="display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);
@@ -475,6 +477,7 @@ async function loadPopularTimesFromGithub() {
           _car_radius: vals.car_radius || 2000,
           population_walk: vals.population_walk != null ? vals.population_walk : null,
           population_car: vals.population_car != null ? vals.population_car : null,
+          population_heatmap: vals.population_heatmap || [],
         };
         loaded++;
       } else if (vals.population_walk || vals.population_car) {
@@ -2253,6 +2256,48 @@ function showConstructionLegend() {
     </div>
   `;
   document.getElementById('tab-map').appendChild(leg);
+}
+
+// ─── ТЕПЛОВА КАРТА НАСЕЛЕННЯ ─────────────────────────────────
+let popHeatLayer = null;
+let showPopHeat = false;
+
+function buildPopulationHeatmap() {
+  if (popHeatLayer) { lmap.removeLayer(popHeatLayer); popHeatLayer = null; }
+  const pts = [];
+  Object.values(pedestrianData).forEach(ped => {
+    const hm = ped.population_heatmap || [];
+    hm.forEach(p => {
+      if (p.lat && p.lon && p.pop > 0) {
+        // Нормалізуємо вагу — max ~500 осіб на шестикутник
+        pts.push([p.lat, p.lon, Math.min(1, p.pop / 300)]);
+      }
+    });
+  });
+  if (pts.length === 0) return false;
+  popHeatLayer = L.heatLayer(pts, {
+    radius: 25, blur: 20, maxZoom: 16,
+    gradient: { 0.1: '#313695', 0.3: '#4575b4', 0.5: '#74add1', 0.7: '#fdae61', 0.9: '#f46d43', 1.0: '#d73027' }
+  });
+  return true;
+}
+
+function togglePopulationHeat() {
+  showPopHeat = !showPopHeat;
+  const btn = document.getElementById('btn-pop-heat');
+  if (showPopHeat) {
+    const ok = buildPopulationHeatmap();
+    if (!ok) {
+      showPopHeat = false;
+      alert('Дані населення відсутні.\nЗапустіть Colab з Блоком 3б і повторіть аналіз.');
+      return;
+    }
+    popHeatLayer.addTo(lmap);
+    btn.classList.add('on');
+  } else {
+    if (popHeatLayer) lmap.removeLayer(popHeatLayer);
+    btn.classList.remove('on');
+  }
 }
 
 init();
