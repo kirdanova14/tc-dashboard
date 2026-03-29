@@ -216,6 +216,7 @@ tr:hover td { background: #fafafa; }
   <div class="tab-pane active" id="tab-dashboard">
     <div class="empty" id="dash-empty"><div class="ico">📍</div><h3>Введіть локації і натисніть «Аналізувати»</h3><p>Дані з OpenStreetMap, два радіуси, теплова карта активності</p></div>
     <div class="dash" id="dash-content" style="display:none"></div>
+    <div id="population-block" style="display:none;padding:0 0 20px 0"></div>
   </div>
   <div class="tab-pane" id="tab-popular">
     <div style="padding:24px">
@@ -522,7 +523,7 @@ async function loadPopularTimesFromGithub() {
       setTimeout(() => notice.remove(), 4000);
 
       // Перемалювати результати якщо аналіз вже є (щоб показати населення)
-      if (results && results.length > 0) renderDash();
+      if (results && results.length > 0) { renderDash(); renderPopulation(); }
     }
     return loaded;
   } catch(e) {
@@ -1016,7 +1017,7 @@ async function runAnalysis() {
   pf.style.width='100%'; stxt.textContent='Готово!';
   setTimeout(()=>sbar.classList.remove('on'),2000);
   btn.disabled=false; btn.textContent='Аналізувати ще раз';
-  renderDash(); renderMap(); renderRaw(); renderPopularTimesTab();
+  renderDash(); renderMap(); renderRaw(); renderPopularTimesTab(); renderPopulation();
   saveResults();
   switchTab('dashboard');
 }
@@ -1028,6 +1029,37 @@ const ML={
   parking:'🅿️ Паркінги', population:'🏘️ Населеність', generators:'🏫 Генератори',
   competition:'🏪 Без конк.', terrain:'⛰️ Рельєф', accessibility:'🗺️ Від центру',
 };
+
+function renderPopulation() {
+  const block = document.getElementById('population-block');
+  if (!block || !results.length) return;
+  const radiiP = getRadii();
+  const rows = results.map((r, i) => {
+    const ped = pedestrianData[r.name];
+    const pw = ped && ped.population_walk != null ? ped.population_walk : null;
+    const pc = ped && ped.population_car  != null ? ped.population_car  : null;
+    if (pw === null && pc === null) return '';
+    return `
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f0f0f0">
+        <div style="width:10px;height:10px;border-radius:50%;background:${LOC_COLORS[i]};flex-shrink:0"></div>
+        <span style="font-size:13px;font-weight:600;min-width:120px">${r.name}</span>
+        ${pw !== null ? `<span style="background:#EBF3FB;border-radius:8px;padding:5px 10px;font-size:12px">👣 ${radiiP.walk}м: <b style="color:#2E6DB4">${pw.toLocaleString('uk-UA')} осіб</b></span>` : ''}
+        ${pc !== null ? `<span style="background:#FFF3E0;border-radius:8px;padding:5px 10px;font-size:12px">🚗 ${radiiP.car}м: <b style="color:#E65100">${pc.toLocaleString('uk-UA')} осіб</b></span>` : ''}
+      </div>`;
+  }).join('');
+
+  if (rows.trim()) {
+    block.style.display = 'block';
+    block.innerHTML = `
+      <div style="background:white;border:1px solid #e8e8e8;border-radius:12px;padding:16px 20px">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:8px;color:#1a2b4a">👥 Населення в зонах аналізу</h3>
+        ${rows}
+        <div style="font-size:10px;color:#aaa;margin-top:8px">Джерело: Kontur Population 2023</div>
+      </div>`;
+  } else {
+    block.style.display = 'none';
+  }
+}
 
 function renderDash() {
   document.getElementById('dash-empty').style.display='none';
@@ -1073,7 +1105,7 @@ function renderDash() {
     }).join('')}</tbody></table>`;
   c.appendChild(dt);
 
-  // Блок населення
+  // Блок населення — окрема функція
   const radiiD = getRadii();
   const popBlock = document.createElement('div');
   popBlock.style.cssText = 'margin-top:20px';
