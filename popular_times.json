@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-03-29T14:20:58.130224",
+    "generated": "2026-03-29T16:04:22.563271",
     "radius_walk": 500,
     "radius_car": 1000
   },
@@ -215,9 +215,35 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-03-29T14:21:05.144993",
+    "collected_at": "2026-03-29T16:04:29.817274",
     "population_walk": 809,
-    "population_car": 2422
+    "population_car": 2422,
+    "population_heatmap": [
+      {
+        "lat": 49.26707,
+        "lon": 24.64536,
+        "pop": 3,
+        "in_walk": false
+      },
+      {
+        "lat": 49.27011,
+        "lon": 24.63328,
+        "pop": 67,
+        "in_walk": true
+      },
+      {
+        "lat": 49.26224,
+        "lon": 24.6351,
+        "pop": 742,
+        "in_walk": true
+      },
+      {
+        "lat": 49.26528,
+        "lon": 24.62302,
+        "pop": 1610,
+        "in_walk": false
+      }
+    ]
   },
   "Бурштин ринок": {
     "peak": 36,
@@ -750,8 +776,34 @@
         "in_walk_radius": false
       }
     ],
-    "collected_at": "2026-03-29T14:21:12.557023",
+    "collected_at": "2026-03-29T16:04:37.207779",
     "population_walk": 510,
-    "population_car": 5776
+    "population_car": 5776,
+    "population_heatmap": [
+      {
+        "lat": 49.25741,
+        "lon": 24.62483,
+        "pop": 2711,
+        "in_walk": false
+      },
+      {
+        "lat": 49.24955,
+        "lon": 24.62665,
+        "pop": 2208,
+        "in_walk": false
+      },
+      {
+        "lat": 49.25437,
+        "lon": 24.63691,
+        "pop": 510,
+        "in_walk": true
+      },
+      {
+        "lat": 49.24651,
+        "lon": 24.63872,
+        "pop": 347,
+        "in_walk": false
+      }
+    ]
   }
 }
