@@ -520,6 +520,9 @@ async function loadPopularTimesFromGithub() {
       notice.textContent = `✅ Popular Times завантажено для ${loaded} локацій`;
       document.body.appendChild(notice);
       setTimeout(() => notice.remove(), 4000);
+
+      // Перемалювати результати якщо аналіз вже є (щоб показати населення)
+      if (results && results.length > 0) renderDash();
     }
     return loaded;
   } catch(e) {
