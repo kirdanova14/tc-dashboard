@@ -456,7 +456,7 @@ function init() {
 async function loadPopularTimesFromGithub() {
   try {
     // Додаємо timestamp щоб обійти кеш браузера
-    const url = 'https://kirdanova14.github.io/tc-dashboard/popular_times.json?t=' + Date.now();
+    const url = 'https://raw.githubusercontent.com/kirdanova14/tc-dashboard/main/popular_times.json?t=' + Date.now();
     const resp = await fetch(url, {cache: 'no-store'});
     if (!resp.ok) return;
     const data = await resp.json();
@@ -2064,7 +2064,7 @@ function saveManualObject(lat, lon) {
 async function loadConstructionData() {
   if (constructionData) return constructionData;
   try {
-    const url = 'https://kirdanova14.github.io/tc-dashboard/construction_permits.json?t=' + Date.now();
+    const url = 'https://raw.githubusercontent.com/kirdanova14/tc-dashboard/main/construction_permits.json?t=' + Date.now();
     const resp = await fetch(url, { cache: 'no-store' });
     if (!resp.ok) throw new Error('not found');
     constructionData = await resp.json();
