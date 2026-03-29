@@ -2269,14 +2269,14 @@ function buildPopulationHeatmap() {
     const hm = ped.population_heatmap || [];
     hm.forEach(p => {
       if (p.lat && p.lon && p.pop > 0) {
-        // Нормалізуємо вагу — max ~500 осіб на шестикутник
-        pts.push([p.lat, p.lon, Math.min(1, p.pop / 300)]);
+        // Вага пропорційна до населення, мінімум 0.3
+        pts.push([p.lat, p.lon, Math.min(1, Math.max(0.3, p.pop / 100))]);
       }
     });
   });
   if (pts.length === 0) return false;
   popHeatLayer = L.heatLayer(pts, {
-    radius: 25, blur: 20, maxZoom: 16,
+    radius: 60, blur: 50, maxZoom: 16, max: 0.3,
     gradient: { 0.1: '#313695', 0.3: '#4575b4', 0.5: '#74add1', 0.7: '#fdae61', 0.9: '#f46d43', 1.0: '#d73027' }
   });
   return true;
