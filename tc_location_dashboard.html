@@ -849,6 +849,7 @@ function renderPopularTimesTab() {
   const c = document.getElementById('popular-times-ui');
   if (!c) return;
   c.innerHTML = '';
+  const radii = getRadii();
 
   if (results.length === 0) {
     c.innerHTML = '<div style="color:#aaa;font-size:13px;text-align:center;padding:20px">Спочатку запустіть аналіз локацій</div>';
