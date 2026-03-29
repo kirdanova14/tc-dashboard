@@ -1073,6 +1073,34 @@ function renderDash() {
     }).join('')}</tbody></table>`;
   c.appendChild(dt);
 
+  // Блок населення
+  const radiiD = getRadii();
+  const popBlock = document.createElement('div');
+  popBlock.style.cssText = 'margin-top:20px';
+  const popRows = results.map((r, i) => {
+    const ped = pedestrianData[r.name];
+    if (!ped || (ped.population_walk == null && ped.population_car == null)) return '';
+    const col = LOC_COLORS[i];
+    return `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0">
+        <div style="width:10px;height:10px;border-radius:50%;background:${col};flex-shrink:0"></div>
+        <div style="font-size:13px;font-weight:600;min-width:120px">${r.name}</div>
+        <div style="background:#EBF3FB;border-radius:8px;padding:6px 12px;font-size:12px">
+          👣 ${radiiD.walk}м: <b style="color:#2E6DB4">${(ped.population_walk||0).toLocaleString('uk-UA')} осіб</b>
+        </div>
+        <div style="background:#FFF3E0;border-radius:8px;padding:6px 12px;font-size:12px">
+          🚗 ${radiiD.car}м: <b style="color:#E65100">${(ped.population_car||0).toLocaleString('uk-UA')} осіб</b>
+        </div>
+      </div>`;
+  }).join('');
+
+  if (popRows.trim()) {
+    popBlock.innerHTML = `
+      <h3 style="font-size:14px;font-weight:600;margin-bottom:12px;color:#1a2b4a">👥 Населення в зонах аналізу</h3>
+      ${popRows}`;
+    c.appendChild(popBlock);
+  }
+
   setTimeout(()=>{
     if(radarC) radarC.destroy();
     if(barC) barC.destroy();
