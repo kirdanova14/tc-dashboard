@@ -472,8 +472,8 @@ async function loadPopularTimesFromGithub() {
           _heatmap_points: vals.heatmap_points || [],
           _walk_radius: vals.walk_radius || 500,
           _car_radius: vals.car_radius || 2000,
-          population_walk: vals.population_walk || null,
-          population_car: vals.population_car || null,
+          population_walk: vals.population_walk != null ? vals.population_walk : null,
+          population_car: vals.population_car != null ? vals.population_car : null,
         };
         loaded++;
       } else if (vals.population_walk || vals.population_car) {
@@ -873,7 +873,7 @@ function renderPopularTimesTab() {
         <h3 style="font-size:14px;font-weight:600">${MEDALS[ri]||'#'+(ri+1)} ${r.name}</h3>
         ${pedScore ? `<span style="margin-left:auto;background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px">Активність: ${Math.round(pedScore)}%</span>` : '<span style="margin-left:auto;font-size:11px;color:#aaa">дані не введені</span>'}
       </div>
-      ${(ped.population_walk || ped.population_car) ? `
+      ${(ped.population_walk != null || ped.population_car != null) ? `
       <div style="display:flex;gap:10px;margin-bottom:14px">
         <div style="flex:1;background:#EBF3FB;border-radius:10px;padding:10px 12px;text-align:center">
           <div style="font-size:10px;color:#5A6A80;margin-bottom:2px">👣 Населення ${radii.walk}м</div>
@@ -1148,7 +1148,7 @@ function renderMap() {
           <tr><td>🏪 Без конк.</td><td align="right"><b>${r.scores.competition}/10</b></td></tr>
           ${trafficInfo}
         </table>
-        ${(pedestrianData[r.name]?.population_walk || pedestrianData[r.name]?.population_car) ? `
+        ${(pedestrianData[r.name]?.population_walk != null || pedestrianData[r.name]?.population_car != null) ? `
         <div style="margin-top:8px;padding-top:8px;border-top:1px solid #eee;font-size:11px">
           <div style="font-weight:600;margin-bottom:4px;color:#555">👥 Населення в зоні</div>
           <div style="display:flex;gap:8px">
