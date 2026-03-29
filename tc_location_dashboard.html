@@ -1,0 +1,2210 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Аналіз локацій для ТЦ</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; }
+
+.header { background: #1a1a2e; color: white; padding: 16px 28px; display: flex; align-items: center; gap: 14px; }
+.header h1 { font-size: 19px; font-weight: 500; }
+.header span { font-size: 12px; color: #aaa; }
+
+.main { display: grid; grid-template-columns: 360px 1fr; height: calc(100vh - 60px); }
+
+.sidebar { background: white; border-right: 1px solid #e5e5e5; overflow-y: auto; overflow-x: hidden; }
+.sb { padding: 16px 18px; border-bottom: 1px solid #f0f0f0; }
+.sb h2 { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+
+.loc-card { background: #fafafa; border: 1px solid #e8e8e8; border-radius: 9px; padding: 12px; margin-bottom: 9px; position: relative; }
+.loc-num { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; margin-bottom: 9px; }
+.loc-card input { width: 100%; border: 1px solid #e0e0e0; border-radius: 6px; padding: 7px 9px; font-size: 12px; margin-bottom: 6px; background: white; color: #1a1a1a; outline: none; }
+.loc-card input:focus { border-color: #4a6fa5; }
+.coords2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.lbl { font-size: 10px; color: #aaa; display: block; margin-bottom: 2px; }
+.remove-btn { position: absolute; top: 9px; right: 9px; background: none; border: none; cursor: pointer; color: #ccc; font-size: 15px; }
+.remove-btn:hover { color: #e74c3c; }
+
+.btn-add { width: 100%; padding: 8px; border: 1.5px dashed #d0d0d0; border-radius: 7px; background: none; color: #999; font-size: 12px; cursor: pointer; }
+.btn-add:hover { border-color: #4a6fa5; color: #4a6fa5; background: #f0f4ff; }
+
+/* Радіуси */
+.radius-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.radius-box { background: #fafafa; border: 1px solid #e8e8e8; border-radius: 8px; padding: 10px; }
+.radius-box label { font-size: 10px; color: #888; display: block; margin-bottom: 5px; }
+.radius-box .rname { font-size: 11px; font-weight: 600; margin-bottom: 4px; }
+.radius-input-row { display: flex; align-items: center; gap: 5px; }
+.radius-input-row input { flex: 1; border: 1px solid #ddd; border-radius: 5px; padding: 5px 7px; font-size: 13px; font-weight: 600; text-align: center; outline: none; }
+.radius-input-row input:focus { border-color: #4a6fa5; }
+.radius-input-row span { font-size: 11px; color: #888; }
+
+.btn-run { width: 100%; padding: 11px; background: #1a1a2e; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 12px; }
+.btn-run:hover { background: #2d2d50; }
+.btn-run:disabled { background: #aaa; cursor: not-allowed; }
+
+.weight-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.weight-row span:first-child { font-size: 12px; flex: 1; }
+.weight-row input[type=range] { width: 80px; }
+.wval { font-size: 11px; font-weight: 600; color: #4a6fa5; width: 30px; text-align: right; }
+
+.status-bar { padding: 10px 18px; font-size: 12px; color: #555; background: #fffbf0; border-bottom: 1px solid #f0e0a0; display: none; }
+.status-bar.on { display: block; }
+.prog { height: 3px; background: #eee; border-radius: 2px; margin-top: 6px; }
+.prog-fill { height: 100%; background: #4a6fa5; border-radius: 2px; transition: width 0.3s; width: 0; }
+
+.content { display: flex; flex-direction: column; overflow: hidden; }
+.tabs { display: flex; background: white; border-bottom: 1px solid #e8e8e8; padding: 0 20px; }
+.tab { padding: 13px 16px; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; color: #999; }
+.tab.active { color: #1a1a2e; border-bottom-color: #4a6fa5; font-weight: 600; }
+.tab-pane { flex: 1; overflow: auto; display: none; }
+.tab-pane.active { display: block; }
+
+#map { height: 100%; min-height: 500px; position: relative; }
+
+.dash { padding: 22px; }
+.score-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.score-card { background: white; border: 1px solid #e8e8e8; border-radius: 11px; padding: 14px; text-align: center; }
+.score-card.win { border: 2px solid #4a6fa5; background: #f6faff; }
+.score-card .rnk { font-size: 22px; margin-bottom: 5px; }
+.score-card .nm { font-size: 12px; font-weight: 600; margin-bottom: 7px; color: #333; }
+.score-card .sc { font-size: 30px; font-weight: 700; }
+.score-card.win .sc { color: #4a6fa5; }
+.score-card .sub { font-size: 10px; color: #aaa; margin-top: 3px; }
+
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+.chart-box { background: white; border: 1px solid #e8e8e8; border-radius: 11px; padding: 16px; }
+.chart-box h3 { font-size: 12px; font-weight: 600; color: #666; margin-bottom: 12px; }
+.chart-box canvas { max-height: 240px; }
+
+.rec-box { background: #1a1a2e; color: white; border-radius: 11px; padding: 20px; margin-bottom: 24px; }
+.rec-box h2 { font-size: 14px; margin-bottom: 6px; }
+.rec-box .wname { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+.rec-box p { font-size: 12px; color: #bbb; line-height: 1.6; }
+
+.dtable { background: white; border: 1px solid #e8e8e8; border-radius: 11px; overflow: hidden; margin-bottom: 24px; }
+.dtable h3 { font-size: 12px; font-weight: 600; color: #666; padding: 14px 18px; border-bottom: 1px solid #f0f0f0; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { background: #fafafa; padding: 9px 14px; text-align: left; font-weight: 600; color: #777; border-bottom: 1px solid #f0f0f0; }
+td { padding: 9px 14px; border-bottom: 1px solid #f8f8f8; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafafa; }
+.bar-cell { display: flex; align-items: center; gap: 7px; }
+.bar { height: 5px; border-radius: 3px; background: #4a6fa5; }
+.bv { font-size: 11px; font-weight: 600; color: #4a6fa5; min-width: 26px; }
+
+.raw-sec { padding: 20px; }
+.raw-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.raw-card { background: white; border: 1px solid #e8e8e8; border-radius: 11px; padding: 16px; }
+.raw-card h3 { font-size: 12px; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+.raw-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+.raw-row span:first-child { color: #666; }
+.raw-row span:last-child { font-weight: 600; }
+
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #bbb; text-align: center; padding: 40px; }
+.empty .ico { font-size: 44px; margin-bottom: 14px; }
+.empty h3 { font-size: 15px; color: #888; margin-bottom: 7px; }
+.empty p { font-size: 12px; line-height: 1.6; max-width: 300px; }
+
+/* Перемикач теплової карти */
+.map-ctrl-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 999;
+  background: white; border-radius: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  display: flex; align-items: center; gap: 4px; padding: 5px 8px; }
+.mctrl-btn { padding: 6px 14px; border-radius: 20px; border: none; cursor: pointer;
+  font-size: 12px; background: transparent; color: #555; font-weight: 500; }
+.mctrl-btn.on { background: #1a1a2e; color: white; }
+.mctrl-sep { width: 1px; height: 20px; background: #eee; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <svg width="26" height="26" viewBox="0 0 26 26"><rect width="26" height="26" rx="6" fill="#4a6fa5"/><path d="M13 4l3.2 5.5H22l-5 4.1 1.9 6.4L13 17l-6.9 3 1.9-6.4-5-4.1h5.8z" fill="white"/></svg>
+  <div style="flex:1"><h1>Аналізатор локацій для ТЦ</h1><span>OpenStreetMap · HERE Traffic · Два радіуси аналізу</span></div>
+  <div style="display:flex;gap:8px">
+    <button onclick="showSavedResults()" style="padding:6px 14px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:white;font-size:12px;cursor:pointer" title="Збережені аналізи">📁 Збережені</button>
+    <button onclick="exportPDF()" id="btn-pdf" style="padding:6px 14px;border-radius:6px;border:none;background:#4a6fa5;color:white;font-size:12px;cursor:pointer;font-weight:600" title="Завантажити PDF звіт">📄 PDF звіт</button>
+  </div>
+</div>
+
+<div class="main">
+<div class="sidebar">
+
+  <div class="sb">
+    <h2>Локації</h2>
+    <div id="loc-list"></div>
+    <button class="btn-add" id="btn-add" onclick="addLoc()">+ Додати локацію</button>
+  </div>
+
+  <div class="sb">
+    <h2>Радіуси аналізу</h2>
+    <div class="radius-grid">
+      <div class="radius-box">
+        <div class="rname" style="color:#e74c3c">Пішохідний</div>
+        <label>радіус зони (м)</label>
+        <div class="radius-input-row">
+          <input type="number" id="r-walk" value="500" min="100" max="2000" step="50">
+          <span>м</span>
+        </div>
+        <div style="font-size:10px;color:#aaa;margin-top:4px">~5-7 хв пішки</div>
+      </div>
+      <div class="radius-box">
+        <div class="rname" style="color:#3498db">Автомобільний</div>
+        <label>радіус зони (м)</label>
+        <div class="radius-input-row">
+          <input type="number" id="r-car" value="2000" min="500" max="10000" step="100">
+          <span>м</span>
+        </div>
+        <div style="font-size:10px;color:#aaa;margin-top:4px">~3-5 хв на авто</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#aaa">Дані збираються в межах автомобільного радіусу</div>
+  </div>
+
+  <div class="sb">
+    <h2>Ваги метрик</h2>
+    <div id="weights-ui"></div>
+    <button class="btn-run" id="btn-run" onclick="runAnalysis()">Аналізувати</button>
+  </div>
+
+  <div class="sb">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <h2 style="margin-bottom:0">🚶 Пішохідний трафік (вручну)</h2>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:#555">
+        <input type="checkbox" id="ped-enabled" checked onchange="togglePedestrian(this.checked)"
+          style="width:14px;height:14px;cursor:pointer">
+        Враховувати
+      </label>
+    </div>
+    <div id="ped-status" style="font-size:11px;margin-bottom:6px"></div>
+    <div id="ped-body">
+      <div style="font-size:11px;color:#aaa;margin-bottom:10px;line-height:1.5">
+        Введіть дані з Google Maps Popular Times або власного підрахунку.<br>
+        Шкала: 0 = порожньо, 100 = дуже людно
+      </div>
+      <div id="pedestrian-inputs"></div>
+      <div style="font-size:10px;color:#aaa;margin-top:8px">
+        💡 Відкрийте Google Maps → знайдіть місце поруч → подивіться графік "Відвідуваність"
+      </div>
+    </div>
+  </div>
+
+  <div class="sb" style="font-size:11px;color:#aaa;line-height:1.7">
+    <h2>Дані</h2>
+    OpenStreetMap / Overpass API<br>
+    Nominatim (адреса)<br>
+    Теплова карта — активність POI<br>
+    <span style="color:#27ae60">● HERE Traffic API — реальний трафік</span>
+  </div>
+</div>
+
+<div class="content">
+  <div class="status-bar" id="sbar"><span id="stxt">Збір даних...</span><div class="prog"><div class="prog-fill" id="pfill"></div></div></div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('dashboard')">Результати</div>
+    <div class="tab" onclick="switchTab('map')">Карта</div>
+    <div class="tab" onclick="switchTab('popular')">Popular Times</div>
+    <div class="tab" onclick="switchTab('raw')">Деталі</div>
+  </div>
+  <div class="tab-pane active" id="tab-dashboard">
+    <div class="empty" id="dash-empty"><div class="ico">📍</div><h3>Введіть локації і натисніть «Аналізувати»</h3><p>Дані з OpenStreetMap, два радіуси, теплова карта активності</p></div>
+    <div class="dash" id="dash-content" style="display:none"></div>
+  </div>
+  <div class="tab-pane" id="tab-popular">
+    <div style="padding:24px">
+      <div style="background:#f8fbff;border:1px solid #d0e4f7;border-radius:12px;padding:20px;margin-bottom:20px">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:8px;color:#1a1a2e">📊 Як отримати дані Popular Times</h3>
+        <ol style="font-size:13px;color:#444;line-height:1.8;padding-left:18px">
+          <li>Відкрийте <a href="https://maps.google.com" target="_blank" style="color:#4a6fa5">Google Maps</a></li>
+          <li>Знайдіть місце <b>поруч з вашою локацією</b> (торговий центр, ринок, зупинка)</li>
+          <li>Натисніть на нього → прокрутіть вниз до розділу <b>"Відвідуваність"</b></li>
+          <li>Подивіться графік по годинах — запишіть пікове значення (0-100%)</li>
+          <li>Введіть дані нижче для кожної локації</li>
+        </ol>
+        <div style="margin-top:12px;padding:10px;background:#fff3cd;border-radius:8px;font-size:12px;color:#856404">
+          💡 Або скористайтесь нашим <b>Google Colab скриптом</b> — він автоматично збере Popular Times для всіх локацій одним кліком
+          <br><a href="https://colab.research.google.com/drive/16mf_5OQdTR9VWSe6BNhbRxKpj4K9wu-t" target="_blank" id="colab-link" style="color:#4a6fa5;font-weight:600">→ Відкрити Colab скрипт</a>
+        </div>
+      </div>
+      <div id="popular-times-ui"></div>
+    </div>
+  </div>
+  <div class="tab-pane" id="tab-map">
+    <div id="map">
+      <div class="map-ctrl-bar" id="map-ctrl" style="display:none">
+        <button class="mctrl-btn on" id="btn-markers" onclick="toggleMarkers()">Маркери</button>
+        <div class="mctrl-sep"></div>
+        <button class="mctrl-btn" id="btn-heat" onclick="toggleHeatmap()">Активність (OSM)</button>
+        <div class="mctrl-sep"></div>
+        <button class="mctrl-btn" id="btn-popular-heat" onclick="togglePopularHeat()">Популярність (Google)</button>
+        <div class="mctrl-sep"></div>
+        <button class="mctrl-btn" id="btn-traffic" onclick="toggleTrafficLayer()">🚦 Трафік HERE</button>
+        <div class="mctrl-sep"></div>
+        <button class="mctrl-btn" id="btn-both" onclick="toggleBoth()">Всі шари</button>
+        <div class="mctrl-sep"></div>
+        <button class="mctrl-btn" id="btn-manual" onclick="toggleManualMode()" title="Додати об'єкт вручну">✏️ Мої об'єкти</button>
+        <div class="mctrl-sep"></div>
+        <button class="mctrl-btn" id="btn-construction" onclick="toggleConstructionLayer()" title="Дозволи на будівництво (e-construction, 2022)">🏗️ Будівництво</button>
+      </div>
+      <!-- Перемикач часу доби — з'являється коли активна теплова карта популярності -->
+      <div id="time-selector" style="display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);
+        z-index:999;background:white;border-radius:30px;box-shadow:0 2px 12px rgba(0,0,0,0.15);
+        display:none;align-items:center;gap:4px;padding:5px 8px">
+        <span style="font-size:11px;color:#888;margin-right:4px">Час доби:</span>
+        <button class="mctrl-btn on" id="tsel-all"     onclick="setTimeFilter('all')"    >🕐 Загальна</button>
+        <div class="mctrl-sep"></div>
+        <button class="mctrl-btn"    id="tsel-morning" onclick="setTimeFilter('morning')" >🌅 Ранок</button>
+        <div class="mctrl-sep"></div>
+        <button class="mctrl-btn"    id="tsel-evening" onclick="setTimeFilter('evening')" >🌆 Вечір</button>
+        <div class="mctrl-sep"></div>
+        <button class="mctrl-btn"    id="tsel-weekend" onclick="setTimeFilter('weekend')" >🎉 Вихідні</button>
+      </div>
+    </div>
+  </div>
+  <div class="tab-pane" id="tab-raw">
+    <div class="empty" id="raw-empty"><div class="ico">🔍</div><h3>Тут будуть деталі після аналізу</h3></div>
+    <div class="raw-sec" id="raw-content" style="display:none"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const OVERPASS_SERVERS = [
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.openstreetmap.ru/api/interpreter',
+];
+const NOMINATIM = 'https://nominatim.openstreetmap.org/reverse';
+const HERE_KEY = 'FuRtZxQgBLK5jfR01lWwn8AWyfGT_oaZnyXlEyNCVtM';
+
+async function fetchOverpass(queryBody) {
+  for (let i = 0; i < OVERPASS_SERVERS.length; i++) {
+    try {
+      const resp = await fetch(OVERPASS_SERVERS[i], {
+        method: 'POST',
+        mode: 'cors',
+        body: 'data=' + encodeURIComponent(queryBody),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      });
+      if (!resp.ok) continue;
+      const text = await resp.text();
+      if (text.trim().startsWith('<')) continue;
+      return JSON.parse(text);
+    } catch(e) {
+      console.warn(`Overpass server ${i+1} failed:`, e.message);
+      if (i === OVERPASS_SERVERS.length - 1) throw new Error('Не вдалось підключитись до OpenStreetMap. Перевірте інтернет-з\'єднання.');
+    }
+  }
+}
+
+// ─── HERE Traffic API ─────────────────────────
+async function fetchHereTraffic(lat, lon, radius) {
+  try {
+    const url = `https://data.traffic.hereapi.com/v7/flow?locationReferencing=shape&in=circle:${lat},${lon};r=${radius}&apiKey=${HERE_KEY}`;
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const results = data.results || [];
+    if (!results.length) return null;
+    let speedSum = 0, freeFlowSum = 0, count = 0;
+    const segments = [];
+    results.forEach(r => {
+      const loc = r.location?.shape?.links || [];
+      loc.forEach(link => {
+        const cur = link.currentFlow;
+        if (cur) {
+          speedSum += cur.speed || 0;
+          freeFlowSum += cur.freeFlow || 0;
+          count++;
+          if (link.points && link.points.length >= 2) {
+            const ratio = cur.freeFlow > 0 ? (cur.speed / cur.freeFlow) : 1;
+            segments.push({
+              points: link.points.map(p => ({ lat: p.lat, lon: p.lng })),
+              speed: Math.round(cur.speed || 0),
+              freeFlow: Math.round(cur.freeFlow || 0),
+              ratio: Math.round(ratio * 100)
+            });
+          }
+        }
+      });
+    });
+    if (count === 0) return null;
+    const avgSpeed = speedSum / count;
+    const avgFreeFlow = freeFlowSum / count;
+    const congestionIndex = avgFreeFlow > 0 ? Math.round((1 - avgSpeed/avgFreeFlow)*10) : 0;
+    return {
+      avg_speed_kmh: Math.round(avgSpeed), free_flow_kmh: Math.round(avgFreeFlow),
+      congestion_index: Math.max(0, Math.min(10, congestionIndex)),
+      traffic_score: Math.max(0, Math.min(10, 10-congestionIndex)),
+      segments_count: count, segments: segments.slice(0, 200),
+      // legacy fallback
+      points: segments.map(s => ({ lat: s.points[0].lat, lon: s.points[0].lon, speed: s.speed, freeFlow: s.freeFlow, ratio: s.ratio })).slice(0,50),
+    };
+  } catch(e) { return null; }
+}
+
+const LOC_COLORS = ['#e74c3c','#3498db','#27ae60','#f39c12','#9b59b6'];
+const MEDALS = ['🥇','🥈','🥉'];
+
+const WEIGHTS_CFG = [
+  {key:'pedestrian',  label:'🚶 Пішохідний',      def:18},
+  {key:'transit',     label:'🚌 Транспорт',        def:13},
+  {key:'roads',       label:'🚗 Дороги',           def:7},
+  {key:'traffic',     label:'🚦 Трафік (HERE)',    def:12},
+  {key:'parking',     label:'🅿️ Паркінги',         def:10},
+  {key:'population',  label:'🏘️ Населеність',      def:12},
+  {key:'generators',  label:'🏫 Генератори',       def:15},
+  {key:'competition', label:'🏪 Без конкурентів',  def:12},
+  {key:'terrain',     label:'⛰️ Рельєф',           def:4},
+  {key:'accessibility',label:'🗺️ Від центру',      def:4},
+];
+
+// Повна таблиця POI для карти
+const POI_LAYERS = [
+  // Транспорт
+  {key:'bus_stops',    label:'Зупинки авт.',      color:'#2980b9', r:5,  group:'transit'},
+  {key:'tram_stops',   label:'Трамвай',            color:'#1abc9c', r:5,  group:'transit'},
+  {key:'metro',        label:'Метро / залізн.',    color:'#8e44ad', r:8,  group:'transit', big:true},
+  // Паркінги
+  {key:'parking',      label:'Паркінги',           color:'#27ae60', r:5,  group:'parking'},
+  // Генератори
+  {key:'schools',      label:'Школи',              color:'#f39c12', r:6,  group:'generators'},
+  {key:'universities', label:'Університети',       color:'#e67e22', r:7,  group:'generators', big:true},
+  {key:'hospitals',    label:'Лікарні',            color:'#e74c3c', r:7,  group:'generators', big:true},
+  {key:'markets',      label:'Ринки',              color:'#d35400', r:7,  group:'generators', big:true},
+  {key:'cinemas',      label:'Кінотеатри',         color:'#9b59b6', r:6,  group:'generators'},
+  {key:'sports',       label:'Спорт',              color:'#16a085', r:6,  group:'generators'},
+  {key:'parks',        label:'Парки',              color:'#2ecc71', r:6,  group:'generators'},
+  {key:'cnap',         label:'ЦНАП / держ.',       color:'#2c3e50', r:7,  group:'generators', big:true},
+  {key:'govt',         label:'Адмін. будівлі',     color:'#34495e', r:6,  group:'generators'},
+  {key:'post',         label:'Пошта',              color:'#7f8c8d', r:5,  group:'generators'},
+  {key:'pharmacies',   label:'Аптеки',             color:'#c0392b', r:4,  group:'population'},
+  {key:'offices_poi',  label:'Офіси',              color:'#607d8b', r:5,  group:'generators'},
+  // Активність
+  {key:'restaurants',  label:'Кафе / ресторани',  color:'#f1c40f', r:4,  group:'population'},
+  {key:'banks',        label:'Банки / ATM',        color:'#7f8c8d', r:4,  group:'population'},
+  {key:'hotels',       label:'Готелі',             color:'#95a5a6', r:5,  group:'population'},
+  // Конкуренти
+  {key:'malls',        label:'ТЦ (конкурент)',     color:'#e74c3c', r:10, group:'competition', big:true},
+  {key:'supermarkets', label:'Супермаркети',       color:'#c0392b', r:6,  group:'competition'},
+  {key:'dept_stores',  label:'Універмаги',         color:'#922b21', r:7,  group:'competition'},
+  {key:'traffic_here', label:'Трафік HERE (🟢вільно 🟡помірно 🔴затор)', color:'#27ae60', r:4, group:'traffic'},
+];
+
+// Кольори і налаштування категорій будівництва
+const CONSTRUCTION_STYLES = {
+  mall:                 { color:'#8e44ad', label:'🏪 ТЦ / великий магазин' },
+  shop:                 { color:'#d35400', label:'🏬 Магазин' },
+  residential_complex:  { color:'#7f8c8d', label:'🏢 Житловий комплекс' },
+  office:               { color:'#2980b9', label:'🏢 Офіс / БЦ' },
+  hotel:                { color:'#16a085', label:'🏨 Готель' },
+  cafe:                 { color:'#f39c12', label:'🍽️ Кафе / ресторан' },
+  industrial:           { color:'#95a5a6', label:'🏭 Склад / виробництво' },
+};
+
+let locations = [], results = [];
+let lmap = null, radarC = null, barC = null;
+let poiGroups = {}, heatLayer = null, popularHeatLayer = null;
+let showMarkers = true, showHeat = false, showPopularHeat = false, showTrafficLayer = false;
+let constructionLayer = null, constructionData = null, showConstruction = false;
+let manualObjects = JSON.parse(localStorage.getItem('tc_manual_objects') || '[]');
+let manualLayer = null;
+let manualMode = false; // режим додавання кліком
+let currentTimeFilter = 'all'; // 'all' | 'morning' | 'evening' | 'weekend'
+
+function setTimeFilter(filter) {
+  currentTimeFilter = filter;
+  // Оновлюємо кнопки
+  ['all','morning','evening','weekend'].forEach(f => {
+    const btn = document.getElementById('tsel-' + f);
+    if (btn) btn.classList.toggle('on', f === filter);
+  });
+  // Перебудовуємо теплову карту з новим фільтром
+  buildPopularHeatmap();
+}
+let activeLayers = new Set(POI_LAYERS.map(l=>l.key));
+
+// ─── INIT ────────────────────────────────────
+function init() {
+  buildWeightsUI();
+  addLoc('Локація 1','50.3936','30.6193');
+  addLoc('Локація 2','50.5197','30.6100');
+  lmap = L.map('map').setView([50.45,30.52],12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    {attribution:'© OpenStreetMap © CARTO', maxZoom:19}).addTo(lmap);
+
+  // Клік на карту — додавання ручного об'єкта
+  lmap.on('click', function(e) {
+    if (!manualMode) return;
+    showAddObjectPopup(e.latlng.lat, e.latlng.lng);
+  });
+
+  // Показати збережені об'єкти одразу
+  renderManualLayer();
+
+  // Автозавантаження Popular Times з GitHub якщо є
+  loadPopularTimesFromGithub();
+}
+
+async function loadPopularTimesFromGithub() {
+  try {
+    // Додаємо timestamp щоб обійти кеш браузера
+    const url = 'https://kirdanova14.github.io/tc-dashboard/popular_times.json?t=' + Date.now();
+    const resp = await fetch(url, {cache: 'no-store'});
+    if (!resp.ok) return;
+    const data = await resp.json();
+    let loaded = 0;
+    Object.entries(data).forEach(([name, vals]) => {
+      if (name === '_meta') return;
+      if (vals.peak !== undefined) {
+        pedestrianData[name] = {
+          peak: vals.peak || 0,
+          morning: vals.morning || 0,
+          evening: vals.evening || 0,
+          weekend: vals.weekend || 0,
+          _heatmap_points: vals.heatmap_points || [],
+          _walk_radius: vals.walk_radius || 500,
+          _car_radius: vals.car_radius || 2000,
+          population_walk: vals.population_walk || null,
+          population_car: vals.population_car || null,
+        };
+        loaded++;
+      } else if (vals.population_walk || vals.population_car) {
+        // Є тільки дані населення (без Popular Times)
+        if (!pedestrianData[name]) pedestrianData[name] = {peak:0,morning:0,evening:0,weekend:0,_heatmap_points:[]};
+        pedestrianData[name].population_walk = vals.population_walk || null;
+        pedestrianData[name].population_car  = vals.population_car  || null;
+      }
+    });
+    if (loaded > 0) {
+      renderPedestrianInputs();
+      // Вмикаємо чекбокс якщо є дані
+      const cb = document.getElementById('ped-enabled');
+      if (cb) { cb.checked = true; togglePedestrian(true); }
+      console.log(`Popular Times завантажено для ${loaded} локацій`);
+
+      // Додаємо маркери популярних місць на карту
+      if (!poiGroups['popular_places']) poiGroups['popular_places'] = L.layerGroup();
+      else poiGroups['popular_places'].clearLayers();
+
+      let totalPoints = 0;
+      Object.entries(pedestrianData).forEach(([locName, data]) => {
+        const pts = data._heatmap_points || [];
+        pts.forEach(p => {
+          if (!p.lat || !p.lon) return;
+          const col = p.rating >= 4.5 ? '#e74c3c' : p.rating >= 4.0 ? '#f39c12' : '#95a5a6';
+          const r = Math.min(10, Math.max(4, Math.round(p.weight * 12)));
+          const m = L.circleMarker([p.lat, p.lon], {
+            radius: r, color: col, fillColor: col, fillOpacity: 0.75, weight: 1
+          });
+          const inWalk = p.in_walk_radius ? '🚶 пішохідна зона' : '🚗 авто зона';
+          m.bindTooltip(`<b>${p.name}</b><br>★ ${p.rating} · ${p.reviews} відгуків<br>${inWalk}`, {direction:'top'});
+          poiGroups['popular_places'].addLayer(m);
+          totalPoints++;
+        });
+      });
+
+      if (totalPoints > 0) {
+        activeLayers.add('popular_places');
+        if (showMarkers) poiGroups['popular_places'].addTo(lmap);
+      }
+      const notice = document.createElement('div');
+      notice.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#27ae60;color:white;padding:10px 16px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,0.2)';
+      notice.textContent = `✅ Popular Times завантажено для ${loaded} локацій`;
+      document.body.appendChild(notice);
+      setTimeout(() => notice.remove(), 4000);
+    }
+    return loaded;
+  } catch(e) {
+    console.log('Popular Times не знайдено:', e.message);
+    return 0;
+  }
+}
+
+function buildWeightsUI() {
+  const c = document.getElementById('weights-ui');
+  WEIGHTS_CFG.forEach(w => {
+    const d = document.createElement('div');
+    d.className = 'weight-row';
+    d.innerHTML = `<span>${w.label}</span>
+      <input type="range" min="0" max="40" step="1" value="${w.def}"
+        oninput="document.getElementById('wv-${w.key}').textContent=this.value+'%'">
+      <span class="wval" id="wv-${w.key}">${w.def}%</span>`;
+    c.appendChild(d);
+  });
+}
+
+function getWeights() {
+  const w={};
+  WEIGHTS_CFG.forEach((cfg,i)=>{
+    const el=document.querySelector(`#weights-ui .weight-row:nth-child(${i+1}) input`);
+    w[cfg.key]=parseInt(el?el.value:cfg.def);
+  });
+  return w;
+}
+
+function getRadii() {
+  return {
+    walk: parseInt(document.getElementById('r-walk').value)||500,
+    car:  parseInt(document.getElementById('r-car').value)||2000,
+  };
+}
+
+// ─── LOCATIONS FORM ──────────────────────────
+function addLoc(name='',lat='',lon='') {
+  if(locations.length>=5) return;
+  const id=Date.now();
+  locations.push({id,name,lat,lon});
+  renderLocs();
+}
+function removeLoc(id) {
+  locations=locations.filter(l=>l.id!==id);
+  renderLocs();
+}
+function renderLocs() {
+  const c=document.getElementById('loc-list');
+  c.innerHTML='';
+  locations.forEach((loc,i)=>{
+    const col=LOC_COLORS[i%LOC_COLORS.length];
+    const d=document.createElement('div');
+    d.className='loc-card';
+    d.innerHTML=`
+      ${locations.length>2?`<button class="remove-btn" onclick="removeLoc(${loc.id})">×</button>`:''}
+      <div class="loc-num" style="background:${col}">${i+1}</div>
+      <input placeholder="Назва локації" value="${loc.name}" oninput="locations[${i}].name=this.value;renderPedestrianInputs()">
+      <div class="coords2">
+        <div><span class="lbl">Широта (lat)</span>
+          <input placeholder="50.3936" value="${loc.lat}" oninput="locations[${i}].lat=this.value"></div>
+        <div><span class="lbl">Довгота (lon)</span>
+          <input placeholder="30.6193" value="${loc.lon}" oninput="locations[${i}].lon=this.value"></div>
+      </div>`;
+    c.appendChild(d);
+  });
+  document.getElementById('btn-add').style.display=locations.length>=5?'none':'block';
+  renderPedestrianInputs();
+}
+
+// ─── OSM FETCH ───────────────────────────────
+function buildOSMQuery(lat, lon, radius) {
+  const A=`around:${radius},${lat},${lon}`;
+  return `[out:json][timeout:90];
+(
+node["highway"="crossing"](${A});
+node["highway"="bus_stop"](${A});
+node["railway"="tram_stop"](${A});
+node["station"="subway"](${A});
+node["railway"="station"](${A});
+node["amenity"="parking"](${A});
+node["amenity"="parking_garage"](${A});
+node["amenity"="school"](${A});
+node["amenity"="university"](${A});
+node["amenity"="marketplace"](${A});
+node["amenity"="hospital"](${A});
+node["amenity"="cinema"](${A});
+node["amenity"="theatre"](${A});
+node["amenity"~"restaurant|cafe|fast_food"](${A});
+node["amenity"~"bank|atm"](${A});
+node["amenity"="pharmacy"](${A});
+node["amenity"="post_office"](${A});
+node["amenity"="townhall"](${A});
+node["amenity"="police"](${A});
+node["amenity"="community_centre"](${A});
+node["office"="government"](${A});
+node["office"="administrative"](${A});
+node["office"~"company|it|coworking"](${A});
+node["shop"="mall"](${A});
+node["shop"="supermarket"](${A});
+node["shop"="hypermarket"](${A});
+node["shop"="department_store"](${A});
+node["tourism"="hotel"](${A});
+node["leisure"="sports_centre"](${A});
+node["leisure"="fitness_centre"](${A});
+node["leisure"="park"](${A});
+way["amenity"="parking"](${A});
+way["amenity"="school"](${A});
+way["amenity"="hospital"](${A});
+way["amenity"="university"](${A});
+way["shop"="mall"](${A});
+way["leisure"="park"](${A});
+way["leisure"="sports_centre"](${A});
+way["landuse"="residential"](${A});
+way["landuse"="commercial"](${A});
+way["landuse"="retail"](${A});
+way["highway"="footway"](${A});
+way["footway"="sidewalk"](${A});
+way["highway"="pedestrian"](${A});
+way["highway"~"motorway|trunk"](${A});
+way["highway"="primary"](${A});
+way["highway"="secondary"](${A});
+way["highway"="tertiary"](${A});
+);
+out center tags;`;
+}
+
+async function fetchOSM(lat, lon, radius) {
+  const data = await fetchOverpass(buildOSMQuery(lat, lon, radius));
+  const els = data.elements||[];
+
+  const cnt  = (tag,val) => els.filter(e=>e.tags&&e.tags[tag]===val).length;
+  const cntR = (tag,re)  => els.filter(e=>e.tags&&re.test(e.tags[tag]||'')).length;
+  const coords = fn => els
+    .filter(e=>fn(e)&&(e.lat||e.center))
+    .map(e=>({lat:e.lat||e.center?.lat, lon:e.lon||e.center?.lon, name:e.tags?.name||e.tags?.['name:uk']||''}))
+    .filter(p=>p.lat&&p.lon).slice(0,100);
+
+  // ЦНАП — шукаємо по тегах і назвах
+  const cnapEl = els.filter(e=>{
+    const tags=e.tags||{};
+    const name=(tags.name||'').toLowerCase();
+    return tags.office==='government'||tags.amenity==='townhall'||
+      name.includes('цнап')||name.includes('центр надання')||name.includes('адміністративн');
+  });
+
+  return {
+    // Лічильники
+    crossings:        cnt('highway','crossing'),
+    footways:         cntR('highway',/footway/),
+    sidewalks:        cnt('footway','sidewalk'),
+    pedestrian_zones: cnt('highway','pedestrian'),
+    bus_stops:        cnt('highway','bus_stop'),
+    tram_stops:       cnt('railway','tram_stop'),
+    metro_stations:   cnt('station','subway'),
+    railway_stations: cntR('railway',/^station$/),
+    motorways:        cntR('highway',/motorway|trunk/),
+    primary_roads:    cnt('highway','primary'),
+    secondary_roads:  cnt('highway','secondary'),
+    tertiary_roads:   cnt('highway','tertiary'),
+    parking_lots:     cnt('amenity','parking'),
+    parking_garages:  cnt('amenity','parking_garage'),
+    residential:      cnt('landuse','residential'),
+    amenities:        els.filter(e=>e.tags&&e.tags.amenity).length,
+    restaurants:      cntR('amenity',/restaurant|cafe|fast_food/),
+    banks:            cntR('amenity',/bank|atm/),
+    pharmacies:       cnt('amenity','pharmacy'),
+    schools:          cnt('amenity','school'),
+    universities:     cnt('amenity','university'),
+    offices:          cnt('landuse','commercial'),
+    offices_node:     els.filter(e=>e.tags&&e.tags.office).length,
+    markets:          cnt('amenity','marketplace'),
+    hospitals:        cnt('amenity','hospital'),
+    sports:           els.filter(e=>e.tags&&/sports_centre|fitness_centre|stadium/.test(e.tags.leisure||'')).length,
+    cinemas:          els.filter(e=>e.tags&&(e.tags.amenity==='cinema'||e.tags.amenity==='theatre')).length,
+    cnap_count:       cnapEl.length,
+    post_offices:     cnt('amenity','post_office'),
+    townhalls:        cnt('amenity','townhall'),
+    community:        cnt('amenity','community_centre'),
+    shopping_malls:   cnt('shop','mall'),
+    supermarkets:     cnt('shop','supermarket'),
+    hypermarkets:     cnt('shop','hypermarket'),
+    department_stores:cnt('shop','department_store'),
+    retail_parks:     cnt('landuse','retail'),
+    hotels:           cnt('tourism','hotel'),
+    parks:            els.filter(e=>e.tags&&e.tags.leisure==='park').length,
+
+    // Координати для карти
+    _poi: {
+      bus_stops:    coords(e=>e.tags?.highway==='bus_stop'),
+      tram_stops:   coords(e=>e.tags?.railway==='tram_stop'),
+      metro:        coords(e=>e.tags?.station==='subway'||e.tags?.railway==='station'),
+      parking:      coords(e=>e.tags?.amenity==='parking'||e.tags?.amenity==='parking_garage'),
+      schools:      coords(e=>e.tags?.amenity==='school'),
+      universities: coords(e=>e.tags?.amenity==='university'),
+      hospitals:    coords(e=>e.tags?.amenity==='hospital'),
+      markets:      coords(e=>e.tags?.amenity==='marketplace'),
+      cinemas:      coords(e=>e.tags?.amenity==='cinema'||e.tags?.amenity==='theatre'),
+      sports:       coords(e=>/sports_centre|fitness_centre|stadium/.test(e.tags?.leisure||'')),
+      parks:        coords(e=>e.tags?.leisure==='park'),
+      cnap:         coords(e=>{
+        const tags=e.tags||{};
+        const nm=(tags.name||'').toLowerCase();
+        return tags.office==='government'||tags.amenity==='townhall'||nm.includes('цнап')||nm.includes('центр надання');
+      }),
+      govt:         coords(e=>e.tags?.amenity==='police'||e.tags?.amenity==='community_centre'),
+      post:         coords(e=>e.tags?.amenity==='post_office'),
+      pharmacies:   coords(e=>e.tags?.amenity==='pharmacy'),
+      offices_poi:  coords(e=>e.tags?.office&&/company|it|coworking/.test(e.tags.office)),
+      restaurants:  coords(e=>/restaurant|cafe|fast_food/.test(e.tags?.amenity||'')),
+      banks:        coords(e=>/bank|atm/.test(e.tags?.amenity||'')),
+      hotels:       coords(e=>e.tags?.tourism==='hotel'),
+      malls:        coords(e=>e.tags?.shop==='mall'),
+      supermarkets: coords(e=>e.tags?.shop==='supermarket'||e.tags?.shop==='hypermarket'),
+      dept_stores:  coords(e=>e.tags?.shop==='department_store'),
+    }
+  };
+}
+
+async function fetchAddr(lat, lon) {
+  try {
+    const r=await fetch(`${NOMINATIM}?lat=${lat}&lon=${lon}&format=json`,{headers:{'Accept-Language':'uk'}});
+    const d=await r.json(); const a=d.address||{};
+    return {display:d.display_name||'', district:a.suburb||a.quarter||a.city_district||a.town||'', city:a.city||a.town||''};
+  } catch { return {display:'',district:'',city:''}; }
+}
+
+// ─── МЕТРИКИ / СКОРИНГ ───────────────────────
+function computeRaw(osm, traffic) {
+  return {
+    pedestrian:  osm.crossings*4+osm.footways*3+osm.sidewalks*2+osm.pedestrian_zones*5,
+    transit:     osm.metro_stations*15+osm.railway_stations*10+osm.tram_stops*6+osm.bus_stops*2,
+    roads:       osm.motorways*5+osm.primary_roads*4+osm.secondary_roads*2+osm.tertiary_roads,
+    traffic:     traffic ? traffic.traffic_score * 10 : 50, // 0-100, вищий = менше заторів
+    parking:     osm.parking_lots*3+osm.parking_garages*5,
+    population:  osm.residential*3+osm.amenities+osm.restaurants*2+osm.banks*2+osm.pharmacies*2,
+    generators:  osm.schools*4+osm.universities*6+osm.offices*3+osm.offices_node*2+
+                 osm.markets*8+osm.hospitals*5+osm.sports*3+osm.cinemas*4+osm.hotels*2+
+                 osm.cnap_count*6+osm.post_offices*2+osm.townhalls*4+osm.community*3+osm.parks*3,
+    competition: osm.shopping_malls*10+osm.hypermarkets*7+osm.department_stores*5+
+                 osm.retail_parks*4+osm.supermarkets*2,
+    terrain:     50,
+    accessibility: 30,
+  };
+}
+
+function norm(v,mn,mx,inv=false) {
+  if(mx===mn) return 5;
+  const s=(v-mn)/(mx-mn)*10;
+  return Math.round((inv?10-s:s)*10)/10;
+}
+
+// ─── ПІШОХІДНИЙ ТРАФІК (ручне введення) ──────
+let pedestrianData = {}; // { locName: { peak: 0-100, morning: 0-100, evening: 0-100, weekend: 0-100 } }
+
+function renderPedestrianInputs() {
+  const c = document.getElementById('pedestrian-inputs');
+  if (!c) return;
+  c.innerHTML = '';
+  locations.filter(l=>l.name).forEach((loc, i) => {
+    const col = LOC_COLORS[i % LOC_COLORS.length];
+    if (!pedestrianData[loc.name]) pedestrianData[loc.name] = {peak:0, morning:0, evening:0, weekend:0};
+    const d = pedestrianData[loc.name];
+    const card = document.createElement('div');
+    card.style.cssText = `background:#fafafa;border:1px solid #e8e8e8;border-radius:9px;padding:10px;margin-bottom:8px;overflow:hidden`;
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <div style="width:9px;height:9px;border-radius:50%;background:${col};flex-shrink:0"></div>
+        <b style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${loc.name}</b>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        ${[
+          ['peak',   'Пік (макс.)',   d.peak,    i],
+          ['morning','Ранок 8-11',    d.morning, i],
+          ['evening','Вечір 17-20',   d.evening, i],
+          ['weekend','Вихідний',      d.weekend, i],
+        ].map(([key, label, val, idx]) => `
+          <div style="min-width:0">
+            <div style="font-size:9px;color:#aaa;margin-bottom:2px">${label}</div>
+            <div style="display:flex;align-items:center;gap:3px">
+              <input type="range" min="0" max="100" value="${val}"
+                style="flex:1;min-width:0;width:0"
+                oninput="setPed('${loc.name}','${key}',+this.value);document.getElementById('pv-${key}-${idx}').textContent=this.value+'%'">
+              <span id="pv-${key}-${idx}" style="font-size:10px;font-weight:700;color:#4a6fa5;width:28px;text-align:right;flex-shrink:0">${val}%</span>
+            </div>
+          </div>`).join('')}
+      </div>`;
+    c.appendChild(card);
+  });
+}
+
+function setPed(name, key, val) {
+  if (!pedestrianData[name]) pedestrianData[name] = {peak:0,morning:0,evening:0,weekend:0};
+  pedestrianData[name][key] = val;
+}
+
+function togglePedestrian(enabled) {
+  const body = document.getElementById('ped-body');
+  body.style.opacity = enabled ? '1' : '0.4';
+  body.style.pointerEvents = enabled ? 'auto' : 'none';
+  const lbl = document.querySelector('label[for="ped-enabled"]') ||
+    document.getElementById('ped-enabled')?.parentElement;
+  // Показуємо статус
+  const statusEl = document.getElementById('ped-status');
+  if (statusEl) {
+    statusEl.textContent = enabled ? '' : '⛔ Не враховується в скорингу';
+    statusEl.style.color = '#e74c3c';
+  }
+}
+
+function getPedScore(locName) {
+  const enabled = document.getElementById('ped-enabled')?.checked !== false;
+  if (!enabled) return null; // не враховувати
+  const d = pedestrianData[locName];
+  if (!d) return null;
+  const avg = (d.peak + d.morning + d.evening + d.weekend) / 4;
+  if (avg === 0) return null;
+  return avg;
+}
+
+// Popular Times вкладка
+function renderPopularTimesTab() {
+  const c = document.getElementById('popular-times-ui');
+  if (!c) return;
+  c.innerHTML = '';
+
+  if (results.length === 0) {
+    c.innerHTML = '<div style="color:#aaa;font-size:13px;text-align:center;padding:20px">Спочатку запустіть аналіз локацій</div>';
+    return;
+  }
+
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+  const hours = ['8','9','10','11','12','13','14','15','16','17','18','19','20','21'];
+
+  results.forEach((r, ri) => {
+    const col = LOC_COLORS[ri % LOC_COLORS.length];
+    const ped = pedestrianData[r.name] || {peak:0,morning:0,evening:0,weekend:0};
+    const pedScore = getPedScore(r.name);
+
+    const section = document.createElement('div');
+    section.style.cssText = 'background:white;border:1px solid #e8e8e8;border-radius:12px;padding:20px;margin-bottom:20px';
+
+    // Заголовок
+    section.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="width:12px;height:12px;border-radius:50%;background:${col}"></div>
+        <h3 style="font-size:14px;font-weight:600">${MEDALS[ri]||'#'+(ri+1)} ${r.name}</h3>
+        ${pedScore ? `<span style="margin-left:auto;background:#e8f5e9;color:#2e7d32;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px">Активність: ${Math.round(pedScore)}%</span>` : '<span style="margin-left:auto;font-size:11px;color:#aaa">дані не введені</span>'}
+      </div>
+      ${(ped.population_walk || ped.population_car) ? `
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <div style="flex:1;background:#EBF3FB;border-radius:10px;padding:10px 12px;text-align:center">
+          <div style="font-size:10px;color:#5A6A80;margin-bottom:2px">👣 Населення ${radii.walk}м</div>
+          <div style="font-size:18px;font-weight:700;color:#2E6DB4">${(ped.population_walk||0).toLocaleString('uk-UA')}</div>
+          <div style="font-size:10px;color:#888">осіб</div>
+        </div>
+        <div style="flex:1;background:#FFF3E0;border-radius:10px;padding:10px 12px;text-align:center">
+          <div style="font-size:10px;color:#5A6A80;margin-bottom:2px">🚗 Населення ${radii.car}м</div>
+          <div style="font-size:18px;font-weight:700;color:#E65100">${(ped.population_car||0).toLocaleString('uk-UA')}</div>
+          <div style="font-size:10px;color:#888">осіб</div>
+        </div>
+      </div>` : ''}
+    `;
+
+    // Графік по годинах (симульований на базі введених даних)
+    if (pedScore) {
+      const barContainer = document.createElement('div');
+      barContainer.style.cssText = 'margin-bottom:16px';
+      barContainer.innerHTML = '<div style="font-size:11px;color:#888;margin-bottom:8px">Прогноз активності по годинах (будній день)</div>';
+
+      const barsDiv = document.createElement('div');
+      barsDiv.style.cssText = 'display:flex;align-items:flex-end;gap:3px;height:80px';
+
+      hours.forEach(h => {
+        const hr = parseInt(h);
+        let val = 0;
+        // Розподіл активності на основі введених даних
+        if (hr >= 8 && hr <= 11) val = ped.morning;
+        else if (hr >= 12 && hr <= 14) val = Math.round((ped.morning + ped.evening) / 2 * 0.8);
+        else if (hr >= 17 && hr <= 20) val = ped.evening;
+        else if (hr >= 15 && hr <= 16) val = Math.round(ped.evening * 0.7);
+        else val = Math.round(ped.peak * 0.3);
+        val = Math.min(100, Math.max(0, val));
+
+        const barH = Math.max(4, Math.round(val * 0.72));
+        const barCol = val > 70 ? col : val > 40 ? col+'aa' : col+'55';
+        barsDiv.innerHTML += `
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">
+            <div style="font-size:8px;color:#aaa">${val}%</div>
+            <div style="width:100%;height:${barH}px;background:${barCol};border-radius:2px 2px 0 0;min-height:4px"></div>
+            <div style="font-size:9px;color:#999">${h}</div>
+          </div>`;
+      });
+      barContainer.appendChild(barsDiv);
+      section.appendChild(barContainer);
+
+      // Дні тижня
+      const weekDiv = document.createElement('div');
+      weekDiv.innerHTML = '<div style="font-size:11px;color:#888;margin-bottom:8px">Активність по днях тижня</div>';
+      const weekBars = document.createElement('div');
+      weekBars.style.cssText = 'display:flex;gap:4px';
+      days.forEach((day, di) => {
+        const isWknd = di >= 5;
+        const val = isWknd ? ped.weekend : Math.round((ped.morning + ped.evening) / 2);
+        const barH = Math.max(4, Math.round(val * 0.5));
+        weekBars.innerHTML += `
+          <div style="flex:1;text-align:center">
+            <div style="font-size:9px;color:#aaa;margin-bottom:3px">${val}%</div>
+            <div style="height:${barH}px;background:${isWknd ? '#f39c12' : col};border-radius:2px;min-height:4px"></div>
+            <div style="font-size:10px;color:${isWknd?'#e67e22':'#666'};margin-top:3px;font-weight:${isWknd?'600':'400'}">${day}</div>
+          </div>`;
+      });
+      weekDiv.appendChild(weekBars);
+      section.appendChild(weekDiv);
+
+      // Висновок
+      const concl = document.createElement('div');
+      concl.style.cssText = 'margin-top:14px;padding:10px;background:#f8f9fa;border-radius:8px;font-size:12px;color:#555;line-height:1.6';
+      const peakTime = ped.evening > ped.morning ? 'вечірній пік (17-20 год)' : 'ранковий пік (8-11 год)';
+      const activity = ped.peak > 70 ? 'висока' : ped.peak > 40 ? 'середня' : 'низька';
+      concl.innerHTML = `<b>Висновок:</b> Локація має <b>${activity}</b> пішохідну активність. Основний ${peakTime}. 
+        ${ped.weekend > ped.evening ? 'Вихідні активніші за будні — добре для ТЦ.' : 'Будні активніші за вихідні.'}`;
+      section.appendChild(concl);
+    } else {
+      section.innerHTML += `<div style="text-align:center;padding:20px;color:#aaa;font-size:13px">
+        Введіть дані трафіку в лівій панелі щоб побачити графік</div>`;
+    }
+
+    c.appendChild(section);
+  });
+}
+
+function scoreAll(res) {
+  const keys=['pedestrian','transit','roads','traffic','parking','population','generators','competition','terrain','accessibility'];
+  const inv=new Set(['competition']);
+  const mn={},mx={};
+  keys.forEach(k=>{ mn[k]=Math.min(...res.map(r=>r.raw[k])); mx[k]=Math.max(...res.map(r=>r.raw[k])); });
+  const W=getWeights();
+  const tw=Object.values(W).reduce((a,b)=>a+b,0)||100;
+  res.forEach(r=>{
+    r.scores={};
+    keys.forEach(k=>{ r.scores[k]=norm(r.raw[k],mn[k],mx[k],inv.has(k)); });
+
+    // Якщо є ручні дані пішохідного трафіку — замінюємо авто-розрахунок
+    const pedManual = getPedScore(r.name);
+    if (pedManual !== null) {
+      r.scores.pedestrian = Math.round(pedManual / 10 * 10) / 10;
+      r.pedestrian_manual = true;
+    }
+
+    r.total=Math.round(keys.reduce((s,k)=>s+r.scores[k]*(W[k]||0)/tw,0)*10)/10;
+  });
+  return res.sort((a,b)=>b.total-a.total);
+}
+
+// ─── АНАЛІЗ ──────────────────────────────────
+async function runAnalysis() {
+  const valid=locations.filter(l=>l.name&&l.lat&&l.lon);
+  if(valid.length<2){alert('Введіть мінімум 2 локації');return;}
+  const radii=getRadii();
+  const btn=document.getElementById('btn-run');
+  btn.disabled=true; btn.textContent='Аналізую...';
+  const sbar=document.getElementById('sbar'), stxt=document.getElementById('stxt'), pf=document.getElementById('pfill');
+  sbar.classList.add('on');
+  results=[];
+  for(let i=0;i<valid.length;i++){
+    const loc=valid[i];
+    stxt.textContent=`Збір даних: ${loc.name} (${i+1}/${valid.length})...`;
+    pf.style.width=Math.round(i/valid.length*80)+'%';
+    try {
+      const [osm, addr, traffic] = await Promise.all([
+        fetchOSM(parseFloat(loc.lat), parseFloat(loc.lon), radii.car),
+        fetchAddr(parseFloat(loc.lat), parseFloat(loc.lon)),
+        fetchHereTraffic(parseFloat(loc.lat), parseFloat(loc.lon), radii.car),
+      ]);
+      results.push({name:loc.name, lat:parseFloat(loc.lat), lon:parseFloat(loc.lon),
+        osm, raw:computeRaw(osm, traffic), address:addr, traffic});
+    } catch(e){ alert(`Помилка для ${loc.name}: ${e.message}`); }
+    await new Promise(r=>setTimeout(r,1200));
+  }
+  stxt.textContent='Розрахунок...'; pf.style.width='92%';
+  scoreAll(results);
+  pf.style.width='95%'; stxt.textContent='Завантаження Popular Times...';
+
+  // Завантажуємо Popular Times з GitHub
+  await loadPopularTimesFromGithub();
+
+  pf.style.width='100%'; stxt.textContent='Готово!';
+  setTimeout(()=>sbar.classList.remove('on'),2000);
+  btn.disabled=false; btn.textContent='Аналізувати ще раз';
+  renderDash(); renderMap(); renderRaw(); renderPopularTimesTab();
+  saveResults();
+  switchTab('dashboard');
+}
+
+// ─── ДАШБОРД ─────────────────────────────────
+const ML={
+  pedestrian:'🚶 Пішохідний', transit:'🚌 Транспорт', roads:'🚗 Дороги',
+  traffic:'🚦 Трафік',
+  parking:'🅿️ Паркінги', population:'🏘️ Населеність', generators:'🏫 Генератори',
+  competition:'🏪 Без конк.', terrain:'⛰️ Рельєф', accessibility:'🗺️ Від центру',
+};
+
+function renderDash() {
+  document.getElementById('dash-empty').style.display='none';
+  const c=document.getElementById('dash-content'); c.style.display='block'; c.innerHTML='';
+  const win=results[0];
+
+  // Рекомендація
+  const rb=document.createElement('div'); rb.className='rec-box';
+  rb.innerHTML=`<h2>Рекомендація</h2><div class="wname">🥇 ${win.name}</div>
+    <p>Загальний скор: ${win.total}/10 · ${win.address?.district||''} ${win.address?.city||''}<br>
+    Радіус аналізу: ${getRadii().car}м (авто) / ${getRadii().walk}м (пішохідний)</p>`;
+  c.appendChild(rb);
+
+  // Картки
+  const sc=document.createElement('div'); sc.className='score-cards';
+  results.forEach((r,i)=>{
+    const card=document.createElement('div'); card.className='score-card'+(i===0?' win':'');
+    card.innerHTML=`<div class="rnk">${MEDALS[i]||'#'+(i+1)}</div><div class="nm">${r.name}</div>
+      <div class="sc">${r.total}</div><div class="sub">з 10 балів</div>`;
+    sc.appendChild(card);
+  });
+  c.appendChild(sc);
+
+  // Графіки
+  const cg=document.createElement('div'); cg.className='charts-grid';
+  cg.innerHTML=`
+    <div class="chart-box"><h3>Порівняння по метриках</h3><canvas id="rc"></canvas></div>
+    <div class="chart-box"><h3>Загальний скор</h3><canvas id="bc"></canvas></div>`;
+  c.appendChild(cg);
+
+  // Таблиця
+  const dt=document.createElement('div'); dt.className='dtable';
+  const mkeys=Object.keys(ML);
+  dt.innerHTML=`<h3>Деталі метрик</h3><table>
+    <thead><tr><th>Метрика</th>${results.map((r,i)=>`<th>${MEDALS[i]||'#'+(i+1)} ${r.name}</th>`).join('')}</tr></thead>
+    <tbody>${mkeys.map(k=>{
+      const mx=Math.max(...results.map(r=>r.scores[k]));
+      return `<tr><td>${ML[k]}</td>${results.map(r=>{
+        const s=r.scores[k], bold=s===mx?'font-weight:700;color:#4a6fa5':'';
+        return `<td><div class="bar-cell"><div class="bar" style="width:${Math.round(s*10)}px"></div>
+          <span class="bv" style="${bold}">${s}/10</span></div></td>`;
+      }).join('')}</tr>`;
+    }).join('')}</tbody></table>`;
+  c.appendChild(dt);
+
+  setTimeout(()=>{
+    if(radarC) radarC.destroy();
+    if(barC) barC.destroy();
+    radarC=new Chart(document.getElementById('rc'),{
+      type:'radar',
+      data:{labels:mkeys.map(k=>ML[k].replace(/^\S+\s/,'')),
+        datasets:results.map((r,i)=>({label:r.name,data:mkeys.map(k=>r.scores[k]),
+          borderColor:LOC_COLORS[i],backgroundColor:LOC_COLORS[i]+'22',borderWidth:2,pointRadius:3}))},
+      options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},
+        scales:{r:{beginAtZero:true,max:10,ticks:{font:{size:10}}}}}
+    });
+    barC=new Chart(document.getElementById('bc'),{
+      type:'bar',
+      data:{labels:results.map(r=>r.name),
+        datasets:[{label:'Скор',data:results.map(r=>r.total),
+          backgroundColor:results.map((_,i)=>LOC_COLORS[i]),borderRadius:5}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:10}}}
+    });
+  },100);
+}
+
+// ─── КАРТА ───────────────────────────────────
+function renderMap() {
+  lmap.eachLayer(l=>{ if(!(l instanceof L.TileLayer)) lmap.removeLayer(l); });
+  poiGroups={}; heatLayer=null; showTrafficLayer=false;
+  const radii=getRadii();
+  const bounds=[];
+
+  results.forEach((r,i)=>{
+    const col=LOC_COLORS[i], medal=MEDALS[i]||'#'+(i+1);
+
+    // Пішохідне коло (суцільне)
+    L.circle([r.lat,r.lon],{radius:radii.walk,color:'#e74c3c',
+      fillColor:'#e74c3c',fillOpacity:0.06,weight:2}).addTo(lmap);
+    // Підпис пішохідного
+    const wLat=r.lat+(radii.walk/111320);
+    L.marker([wLat,r.lon],{icon:L.divIcon({className:'',
+      html:`<div style="background:#e74c3c;color:white;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;white-space:nowrap">${(radii.walk/1000).toFixed(2)} км пішки</div>`,
+      iconAnchor:[38,8]}),interactive:false}).addTo(lmap);
+
+    // Автомобільне коло (пунктир)
+    L.circle([r.lat,r.lon],{radius:radii.car,color:col,
+      fillColor:col,fillOpacity:0.04,weight:2,dashArray:'8 5'}).addTo(lmap);
+    // Підпис авто
+    const cLat=r.lat+(radii.car/111320);
+    L.marker([cLat,r.lon],{icon:L.divIcon({className:'',
+      html:`<div style="background:${col};color:white;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;white-space:nowrap">${(radii.car/1000).toFixed(1)} км авто</div>`,
+      iconAnchor:[38,8]}),interactive:false}).addTo(lmap);
+
+    // Головний маркер
+    const trafficInfo = r.traffic ? 
+      `<tr><td>🚦 Швидкість</td><td align="right"><b>${r.traffic.avg_speed_kmh} км/г</b></td></tr>
+       <tr><td>🔴 Затори</td><td align="right"><b>${r.traffic.congestion_index}/10</b></td></tr>` : 
+      `<tr><td>🚦 Трафік</td><td align="right"><b>немає даних</b></td></tr>`;
+
+    L.marker([r.lat,r.lon],{
+      icon:L.divIcon({className:'',
+        html:`<div style="background:${col};color:white;border-radius:50%;width:42px;height:42px;
+          display:flex;flex-direction:column;align-items:center;justify-content:center;
+          font-weight:700;font-size:14px;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);line-height:1.1">
+          <span>${i+1}</span><span style="font-size:9px;opacity:0.9">${r.total}/10</span></div>`,
+        iconSize:[42,42],iconAnchor:[21,21]}),
+      zIndexOffset:1000
+    }).addTo(lmap).bindPopup(`
+      <div style="font-family:sans-serif;min-width:220px">
+        <b style="font-size:14px">${medal} ${r.name}</b><br>
+        <span style="color:#777;font-size:11px">${r.address?.district||''} ${r.address?.city||''}</span>
+        <hr style="margin:7px 0">
+        <b style="color:${col}">Скор: ${r.total}/10</b>
+        <table style="font-size:11px;margin-top:5px;width:100%">
+          <tr><td>🚶 Пішохідний</td><td align="right"><b>${r.scores.pedestrian}/10</b></td></tr>
+          <tr><td>🚌 Транспорт</td><td align="right"><b>${r.scores.transit}/10</b></td></tr>
+          <tr><td>🅿️ Паркінги</td><td align="right"><b>${r.scores.parking}/10</b></td></tr>
+          <tr><td>🏫 Генератори</td><td align="right"><b>${r.scores.generators}/10</b></td></tr>
+          <tr><td>🏪 Без конк.</td><td align="right"><b>${r.scores.competition}/10</b></td></tr>
+          ${trafficInfo}
+        </table>
+        ${(pedestrianData[r.name]?.population_walk || pedestrianData[r.name]?.population_car) ? `
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid #eee;font-size:11px">
+          <div style="font-weight:600;margin-bottom:4px;color:#555">👥 Населення в зоні</div>
+          <div style="display:flex;gap:8px">
+            <span>👣 ${radii.walk}м: <b>${(pedestrianData[r.name]?.population_walk||0).toLocaleString('uk-UA')}</b></span>
+            <span>🚗 ${radii.car}м: <b>${(pedestrianData[r.name]?.population_car||0).toLocaleString('uk-UA')}</b></span>
+          </div>
+        </div>` : ''}
+        <div style="font-size:10px;color:#bbb;margin-top:6px">
+          Пішохідний r: ${radii.walk}м · Авто r: ${radii.car}м
+        </div>
+      </div>`,{maxWidth:260});
+
+    // Трафік HERE — кольорові лінії вздовж доріг
+    if (r.traffic) {
+      const tGroup = L.layerGroup();
+      const segs = r.traffic.segments || [];
+      segs.forEach(seg => {
+        const ratio = seg.ratio / 100;
+        const tColor = ratio > 0.75 ? '#27ae60' : ratio > 0.45 ? '#f39c12' : '#e74c3c';
+        const latlngs = seg.points.map(p => [p.lat, p.lon]);
+        L.polyline(latlngs, {
+          color: tColor, weight: 5, opacity: 0.85,
+          lineJoin: 'round', lineCap: 'round'
+        }).bindTooltip(
+          `🚦 <b>${seg.speed} км/г</b> (вільно: ${seg.freeFlow} км/г)` +
+          `<br>${ratio > 0.75 ? '🟢 Вільно' : ratio > 0.45 ? '🟡 Помірно' : '🔴 Затор'}`,
+          { direction: 'top', sticky: true }
+        ).addTo(tGroup);
+      });
+      // fallback — якщо segments порожній але є старі points
+      if (!segs.length && r.traffic.points && r.traffic.points.length) {
+        r.traffic.points.forEach(p => {
+          const ratio = p.ratio / 100;
+          const tColor = ratio > 0.75 ? '#27ae60' : ratio > 0.45 ? '#f39c12' : '#e74c3c';
+          L.circleMarker([p.lat, p.lon], {
+            radius: 5, color: tColor, fillColor: tColor, fillOpacity: 0.9, weight: 1
+          }).bindTooltip(`🚦 ${p.speed} км/г (вільно: ${p.freeFlow} км/г)`, { direction: 'top' })
+            .addTo(tGroup);
+        });
+      }
+      if (!poiGroups['traffic_here']) poiGroups['traffic_here'] = tGroup;
+      else tGroup.eachLayer(l => poiGroups['traffic_here'].addLayer(l));
+      if (activeLayers.has('traffic_here')) tGroup.addTo(lmap);
+    }
+
+    bounds.push([r.lat,r.lon]);
+
+    // POI маркери
+    const poi=r.osm._poi||{};
+    POI_LAYERS.forEach(cfg=>{
+      const pts=poi[cfg.key]||[];
+      if(!pts.length) return;
+      if(!poiGroups[cfg.key]) poiGroups[cfg.key]=L.layerGroup();
+      pts.forEach(p=>{
+        const m=L.circleMarker([p.lat,p.lon],{
+          radius:cfg.r||5, color:cfg.color, fillColor:cfg.color,
+          fillOpacity:0.85, weight:cfg.big?2:1
+        });
+        m.bindTooltip(`${p.name?'<b>'+p.name+'</b><br>':''}<span style="color:${cfg.color}">${cfg.label}</span>`,
+          {direction:'top',offset:[0,-4]});
+        poiGroups[cfg.key].addLayer(m);
+      });
+    });
+  });
+
+  // Всі активні шари
+  POI_LAYERS.forEach(cfg=>{
+    if(activeLayers.has(cfg.key)&&poiGroups[cfg.key])
+      poiGroups[cfg.key].addTo(lmap);
+  });
+
+  // Теплова карта (всі POI як джерела активності)
+  buildHeatmap();
+
+  if(bounds.length) lmap.fitBounds(bounds,{padding:[80,80]});
+  buildLegend();
+  document.getElementById('map-ctrl').style.display='flex';
+  applyMapMode();
+}
+
+function buildHeatmap() {
+  const pts=[];
+  results.forEach(r=>{
+    const poi=r.osm._poi||{};
+    // Інтенсивність залежить від типу генератора
+    const weights={
+      bus_stops:0.3, tram_stops:0.5, metro:1.0, parking:0.4,
+      schools:0.7, universities:0.9, hospitals:0.8, markets:1.0,
+      cinemas:0.6, sports:0.5, parks:0.4, cnap:0.8, govt:0.5, post:0.3,
+      pharmacies:0.3, offices_poi:0.5, restaurants:0.5, banks:0.3,
+      hotels:0.4, malls:1.2, supermarkets:0.6, dept_stores:0.7
+    };
+    Object.entries(poi).forEach(([key,arr])=>{
+      const w=weights[key]||0.3;
+      arr.forEach(p=>pts.push([p.lat,p.lon,w]));
+    });
+  });
+  if(pts.length>0) {
+    heatLayer=L.heatLayer(pts,{radius:30,blur:25,maxZoom:16,
+      gradient:{0.2:'#313695',0.4:'#74add1',0.6:'#fee090',0.8:'#f46d43',1.0:'#d73027'}});
+  }
+}
+
+function applyMapMode() {
+  const mBtn=document.getElementById('btn-markers');
+  const hBtn=document.getElementById('btn-heat');
+  const phBtn=document.getElementById('btn-popular-heat');
+  const tBtn=document.getElementById('btn-traffic');
+  const bBtn=document.getElementById('btn-both');
+  mBtn.classList.toggle('on', showMarkers && !showHeat && !showPopularHeat && !showTrafficLayer);
+  hBtn.classList.toggle('on', showHeat && !showMarkers && !showPopularHeat && !showTrafficLayer);
+  phBtn.classList.toggle('on', showPopularHeat && !showHeat && !showMarkers && !showTrafficLayer);
+  tBtn.classList.toggle('on', showTrafficLayer && !showMarkers && !showHeat && !showPopularHeat);
+  bBtn.classList.toggle('on', showMarkers && showHeat && showPopularHeat && showTrafficLayer);
+
+  POI_LAYERS.forEach(cfg=>{
+    if(!poiGroups[cfg.key]) return;
+    // traffic_here шар керується окремо
+    if(cfg.key === 'traffic_here') {
+      if(showTrafficLayer && activeLayers.has('traffic_here')) poiGroups['traffic_here'].addTo(lmap);
+      else lmap.removeLayer(poiGroups['traffic_here']);
+      return;
+    }
+    if(showMarkers&&activeLayers.has(cfg.key)) poiGroups[cfg.key].addTo(lmap);
+    else lmap.removeLayer(poiGroups[cfg.key]);
+  });
+
+  if(heatLayer) {
+    if(showHeat) heatLayer.addTo(lmap);
+    else lmap.removeLayer(heatLayer);
+  }
+
+  if(popularHeatLayer) {
+    if(showPopularHeat) popularHeatLayer.addTo(lmap);
+    else lmap.removeLayer(popularHeatLayer);
+  }
+}
+
+function toggleMarkers()    { showMarkers=true; showHeat=false; showPopularHeat=false; showTrafficLayer=false; applyMapMode(); hideTimeSelector(); }
+function toggleHeatmap()    { showMarkers=false; showHeat=true; showPopularHeat=false; showTrafficLayer=false; applyMapMode(); hideTimeSelector(); }
+function togglePopularHeat(){ showMarkers=false; showHeat=false; showPopularHeat=true; showTrafficLayer=false; applyMapMode(); showTimeSelector(); buildPopularHeatmap(); }
+function toggleTrafficLayer(){ showMarkers=false; showHeat=false; showPopularHeat=false; showTrafficLayer=true; applyMapMode(); hideTimeSelector(); }
+function toggleBoth()       { showMarkers=true; showHeat=true; showPopularHeat=true; showTrafficLayer=true; applyMapMode(); showTimeSelector(); buildPopularHeatmap(); }
+
+function showTimeSelector() {
+  const el = document.getElementById('time-selector');
+  if (el) el.style.display = 'flex';
+}
+function hideTimeSelector() {
+  const el = document.getElementById('time-selector');
+  if (el) el.style.display = 'none';
+}
+
+// Множники активності для кожного часу доби
+const TIME_WEIGHTS = {
+  all:     p => p.weight || 0.5,
+  morning: p => (p.weight || 0.5) * ((p.morning_factor || 0.6)),
+  evening: p => (p.weight || 0.5) * ((p.evening_factor || 0.85)),
+  weekend: p => (p.weight || 0.5) * ((p.weekend_factor || 0.9)),
+};
+
+const TIME_GRADIENTS = {
+  all:     {0.0:'#ffffcc', 0.3:'#fed976', 0.5:'#feb24c', 0.7:'#f03b20', 1.0:'#bd0026'},
+  morning: {0.0:'#f7fcf0', 0.3:'#ccebc5', 0.5:'#7bccc4', 0.7:'#2b8cbe', 1.0:'#084081'},
+  evening: {0.0:'#fcfbfd', 0.3:'#bcbddc', 0.5:'#9e9ac8', 0.7:'#756bb1', 1.0:'#54278f'},
+  weekend: {0.0:'#fff7ec', 0.3:'#fdd49e', 0.5:'#fdbb84', 0.7:'#e34a33', 1.0:'#b30000'},
+};
+
+function buildPopularHeatmap() {
+  if(popularHeatLayer) { lmap.removeLayer(popularHeatLayer); popularHeatLayer=null; }
+  const pts = [];
+  const weightFn = TIME_WEIGHTS[currentTimeFilter] || TIME_WEIGHTS.all;
+
+  Object.entries(pedestrianData).forEach(([locName, data]) => {
+    const heatPts = data._heatmap_points || [];
+    // Якщо є дані Popular Times — додаємо фактори часу доби
+    const peakVal   = data.peak    || 0;
+    const morningVal = data.morning || 0;
+    const eveningVal = data.evening || 0;
+    const weekendVal = data.weekend || 0;
+
+    heatPts.forEach(p => {
+      if(!p.lat || !p.lon) return;
+      // Додаємо фактори часу до точки
+      const enriched = {
+        ...p,
+        morning_factor: peakVal > 0 ? morningVal / peakVal : 0.6,
+        evening_factor: peakVal > 0 ? eveningVal / peakVal : 0.85,
+        weekend_factor: peakVal > 0 ? weekendVal / peakVal : 0.9,
+      };
+      const w = Math.min(1.0, Math.max(0.05, weightFn(enriched)));
+      pts.push([p.lat, p.lon, w]);
+    });
+  });
+
+  if(pts.length > 0) {
+    popularHeatLayer = L.heatLayer(pts, {
+      radius: 35, blur: 30, maxZoom: 17,
+      gradient: TIME_GRADIENTS[currentTimeFilter] || TIME_GRADIENTS.all,
+    });
+    if(showPopularHeat) popularHeatLayer.addTo(lmap);
+  } else {
+    const notice = document.createElement('div');
+    notice.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#f39c12;color:white;padding:10px 20px;border-radius:8px;font-size:13px;z-index:9999';
+    notice.textContent = 'Запустіть Colab скрипт щоб отримати дані популярності';
+    document.body.appendChild(notice);
+    setTimeout(()=>notice.remove(), 4000);
+  }
+}
+
+function togglePOI(key,row) {
+  if(activeLayers.has(key)){
+    activeLayers.delete(key);
+    if(poiGroups[key]) lmap.removeLayer(poiGroups[key]);
+    row.querySelector('.ldot').style.opacity='0.25';
+    row.querySelector('.lname').style.color='#ccc';
+  } else {
+    activeLayers.add(key);
+    if(showMarkers&&poiGroups[key]) poiGroups[key].addTo(lmap);
+    row.querySelector('.ldot').style.opacity='1';
+    row.querySelector('.lname').style.color='#333';
+  }
+}
+
+function toggleGroup(grp,show) {
+  POI_LAYERS.filter(l=>l.group===grp).forEach(cfg=>{
+    if(show) activeLayers.add(cfg.key); else activeLayers.delete(cfg.key);
+    if(poiGroups[cfg.key]){
+      if(show&&showMarkers) poiGroups[cfg.key].addTo(lmap);
+      else lmap.removeLayer(poiGroups[cfg.key]);
+    }
+  });
+  buildLegend();
+}
+
+function buildLegend() {
+  const old=document.getElementById('mleg'); if(old) old.remove();
+  const grpDefs=[
+    {id:'transit',    label:'Транспорт'},
+    {id:'parking',    label:'Паркінги'},
+    {id:'generators', label:'Генератори трафіку'},
+    {id:'population', label:'Активність / POI'},
+    {id:'competition',label:'Конкуренти'},
+    {id:'traffic',    label:'Трафік HERE'},
+    {id:'google',     label:'Google Popular Places'},
+  ];
+  const leg=document.createElement('div');
+  leg.id='mleg';
+  leg.style.cssText=`position:absolute;bottom:60px;right:10px;z-index:998;background:white;
+    border-radius:10px;box-shadow:0 2px 14px rgba(0,0,0,0.14);padding:12px 14px;
+    font-family:sans-serif;font-size:12px;max-width:190px;max-height:calc(50% - 20px);overflow-y:auto;`;
+  leg.innerHTML=`<div style="font-weight:700;font-size:13px;margin-bottom:10px;color:#222">Шари</div>`;
+
+  grpDefs.forEach(grp=>{
+    const items=POI_LAYERS.filter(l=>l.group===grp.id);
+    if(!items.length) return;
+    const gd=document.createElement('div'); gd.style.marginBottom='10px';
+    gd.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+      <span style="font-size:10px;text-transform:uppercase;color:#aaa;letter-spacing:0.5px">${grp.label}</span>
+      <span style="font-size:10px;color:#4a6fa5;cursor:pointer" onclick="toggleGroup('${grp.id}',true)">вкл</span>
+      <span style="font-size:10px;color:#aaa;cursor:pointer;margin-left:4px" onclick="toggleGroup('${grp.id}',false)">викл</span>
+    </div>`;
+    items.forEach(cfg=>{
+      const on=activeLayers.has(cfg.key);
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:6px;padding:3px 0;cursor:pointer;';
+      row.innerHTML=`<div class="ldot" style="width:${cfg.big?12:9}px;height:${cfg.big?12:9}px;border-radius:50%;
+        background:${cfg.color};flex-shrink:0;opacity:${on?1:0.25}"></div>
+        <span class="lname" style="flex:1;color:${on?'#333':'#ccc'}">${cfg.label}</span>`;
+      row.onclick=()=>togglePOI(cfg.key,row);
+      gd.appendChild(row);
+    });
+    leg.appendChild(gd);
+  });
+
+  // Теплова карта пояснення
+  const hinfo=document.createElement('div');
+  hinfo.style.cssText='margin-top:8px;padding-top:8px;border-top:1px solid #f0f0f0;font-size:10px;color:#aaa;line-height:1.5';
+  hinfo.innerHTML=`<b style="color:#555">Теплова карта</b><br>Інтенсивність = концентрація активних об'єктів.<br>
+    <span style="color:#d73027">●</span> висока · <span style="color:#f46d43">●</span> середня · <span style="color:#74add1">●</span> низька`;
+  leg.appendChild(hinfo);
+
+  // Кнопки
+  const btns=document.createElement('div');
+  btns.style.cssText='display:flex;gap:5px;margin-top:10px;';
+  btns.innerHTML=`<button onclick="toggleAllLayers(true)" style="flex:1;font-size:10px;padding:4px;border:1px solid #ddd;border-radius:5px;cursor:pointer;background:#fafafa">Всі</button>
+    <button onclick="toggleAllLayers(false)" style="flex:1;font-size:10px;padding:4px;border:1px solid #ddd;border-radius:5px;cursor:pointer;background:#fafafa">Жодного</button>`;
+  leg.appendChild(btns);
+  document.getElementById('tab-map').appendChild(leg);
+}
+
+function toggleAllLayers(show) {
+  POI_LAYERS.forEach(cfg=>{
+    if(show) activeLayers.add(cfg.key); else activeLayers.delete(cfg.key);
+    if(poiGroups[cfg.key]){
+      if(show&&showMarkers) poiGroups[cfg.key].addTo(lmap);
+      else lmap.removeLayer(poiGroups[cfg.key]);
+    }
+  });
+  buildLegend();
+}
+
+// ─── ДЕТАЛІ ──────────────────────────────────
+function renderRaw() {
+  document.getElementById('raw-empty').style.display='none';
+  const c=document.getElementById('raw-content'); c.style.display='block'; c.innerHTML='';
+  const grid=document.createElement('div'); grid.className='raw-grid';
+  const secs=[
+    {title:'🚶 Пішохідна інфраструктура',
+     keys:['crossings','footways','sidewalks','pedestrian_zones'],
+     labels:['Переходи','Пішохідні шляхи','Тротуари','Пішохідні зони']},
+    {title:'🚌 Транспорт',
+     keys:['metro_stations','railway_stations','tram_stops','bus_stops'],
+     labels:['Метро','Залізниця','Трамвай','Автобуси']},
+    {title:'🚗 Дороги та паркінги',
+     keys:['motorways','primary_roads','secondary_roads','parking_lots','parking_garages'],
+     labels:['Магістралі','Головні вулиці','Другорядні','Паркінги','Паркінг-гаражі']},
+    {title:'🏫 Генератори трафіку',
+     keys:['schools','universities','offices_node','markets','hospitals','cinemas','sports','parks','cnap_count','post_offices','townhalls','community'],
+     labels:['Школи','Університети','Офіси','Ринки','Лікарні','Кіно/театри','Спорт','Парки','ЦНАП/держ.','Пошта','Міськрада','Громад. центри']},
+    {title:'🏘️ Населеність',
+     keys:['residential','amenities','restaurants','banks','pharmacies','hotels'],
+     labels:['Жит. квартали','Всі POI','Кафе/ресторани','Банки/ATM','Аптеки','Готелі']},
+    {title:'🏪 Конкуренти',
+     keys:['shopping_malls','hypermarkets','supermarkets','department_stores','retail_parks'],
+     labels:['ТЦ','Гіпермаркети','Супермаркети','Універмаги','Торг. зони']},
+  ];
+  secs.forEach(sec=>{
+    const card=document.createElement('div'); card.className='raw-card';
+    const rows=sec.keys.map((k,i)=>{
+      const vals=results.map(r=>`<span style="color:${LOC_COLORS[results.indexOf(r)]};font-weight:600">${r.osm[k]||0}</span>`).join(' / ');
+      return `<div class="raw-row"><span>${sec.labels[i]}</span><span>${vals}</span></div>`;
+    }).join('');
+    card.innerHTML=`<h3>${sec.title}</h3>${rows}`;
+    grid.appendChild(card);
+  });
+  c.appendChild(grid);
+}
+
+// ─── TABS ────────────────────────────────────
+function switchTab(name) {
+  const names=['dashboard','map','popular','raw'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.tab-pane').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='map') setTimeout(()=>lmap.invalidateSize(),100);
+  if(name==='popular') renderPopularTimesTab();
+}
+
+// ─── ЗБЕРЕЖЕННЯ РЕЗУЛЬТАТІВ ──────────────────
+function saveResults() {
+  if (!results.length) return;
+  const saved = JSON.parse(localStorage.getItem('tc_saved_analyses') || '[]');
+  const entry = {
+    id: Date.now(),
+    date: new Date().toLocaleString('uk-UA'),
+    radii: getRadii(),
+    locations: results.map(r => ({
+      name: r.name, lat: r.lat, lon: r.lon,
+      total: r.total, scores: r.scores,
+      address: r.address,
+      traffic: r.traffic,
+    })),
+    winner: results[0]?.name,
+  };
+  saved.unshift(entry);
+  // Зберігаємо максимум 20 аналізів
+  if (saved.length > 20) saved.splice(20);
+  localStorage.setItem('tc_saved_analyses', JSON.stringify(saved));
+
+  // Показуємо підтвердження
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#27ae60;color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2)';
+  toast.textContent = '✅ Аналіз збережено!';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function showSavedResults() {
+  const modal = document.getElementById('saved-modal');
+  const list = document.getElementById('saved-list');
+  const saved = JSON.parse(localStorage.getItem('tc_saved_analyses') || '[]');
+  modal.style.display = 'flex';
+
+  if (!saved.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:#aaa"><div style="font-size:40px;margin-bottom:12px">📂</div><div style="font-size:14px">Немає збережених аналізів</div><div style="font-size:12px;margin-top:6px">Запустіть аналіз і він збережеться автоматично</div></div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  saved.forEach(entry => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:#fafafa;border:1px solid #e8e8e8;border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color 0.2s';
+    card.onmouseenter = () => card.style.borderColor = '#4a6fa5';
+    card.onmouseleave = () => card.style.borderColor = '#e8e8e8';
+
+    const locs = entry.locations.map((l, i) => {
+      const medals = ['🥇','🥈','🥉'];
+      return `<span style="margin-right:10px">${medals[i]||'•'} ${l.name} <b>${l.total}/10</b></span>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:12px;color:#888">${entry.date}</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="loadSavedAnalysis(${entry.id})" style="padding:4px 10px;background:#4a6fa5;color:white;border:none;border-radius:5px;font-size:11px;cursor:pointer">Завантажити</button>
+          <button onclick="deleteSaved(${entry.id})" style="padding:4px 10px;background:#fee;color:#e74c3c;border:1px solid #fcc;border-radius:5px;font-size:11px;cursor:pointer">Видалити</button>
+        </div>
+      </div>
+      <div style="font-size:13px;margin-bottom:6px">${locs}</div>
+      <div style="font-size:11px;color:#aaa">Радіус: ${entry.radii?.walk||500}м пішки / ${entry.radii?.car||2000}м авто · Переможець: ${entry.winner||'—'}</div>`;
+    list.appendChild(card);
+  });
+}
+
+function loadSavedAnalysis(id) {
+  const saved = JSON.parse(localStorage.getItem('tc_saved_analyses') || '[]');
+  const entry = saved.find(e => e.id === id);
+  if (!entry) return;
+
+  // Відновлюємо локації
+  locations = entry.locations.map((l, i) => ({
+    id: Date.now() + i, name: l.name, lat: String(l.lat), lon: String(l.lon)
+  }));
+  renderLocs();
+
+  // Показуємо результати
+  results = entry.locations.map(l => ({...l, raw: {}, osm: {}, _poi: {}}));
+  renderDash(); renderMap(); renderRaw();
+  document.getElementById('saved-modal').style.display = 'none';
+  switchTab('dashboard');
+
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#4a6fa5;color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999';
+  toast.textContent = '📂 Аналіз завантажено!';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
+}
+
+function deleteSaved(id) {
+  let saved = JSON.parse(localStorage.getItem('tc_saved_analyses') || '[]');
+  saved = saved.filter(e => e.id !== id);
+  localStorage.setItem('tc_saved_analyses', JSON.stringify(saved));
+  showSavedResults();
+}
+
+// ─── PDF ЗВІТ ────────────────────────────────
+async function exportPDF() {
+  if (!results.length) {
+    alert('Спочатку запустіть аналіз локацій');
+    return;
+  }
+
+  const btn = document.getElementById('btn-pdf');
+  btn.textContent = '⏳ Генерую...';
+  btn.disabled = true;
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210, margin = 15;
+    const medals = ['🥇','🥈','🥉','4.','5.'];
+    const date = new Date().toLocaleDateString('uk-UA');
+    const winner = results[0];
+    const radii = getRadii();
+
+    // Завантажуємо шрифт що підтримує кирилицю
+    // Використовуємо canvas для рендеру тексту
+    const canvas = document.createElement('canvas');
+    canvas.width = 794;  // A4 at 96dpi
+    canvas.height = 1123;
+    const ctx = canvas.getContext('2d');
+
+    const drawPage = (pageNum) => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    };
+
+    const addCanvasToDoc = (canvasEl, pageIndex) => {
+      const imgData = canvasEl.toDataURL('image/jpeg', 0.92);
+      if (pageIndex > 0) doc.addPage();
+      doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+    };
+
+    // ── СТОРІНКА 1 — Титул + зведена таблиця ──
+    const c1 = document.createElement('canvas');
+    c1.width = 794; c1.height = 1123;
+    const x1 = c1.getContext('2d');
+
+    // Фон
+    x1.fillStyle = 'white';
+    x1.fillRect(0, 0, 794, 1123);
+
+    // Шапка
+    x1.fillStyle = '#1a1a2e';
+    x1.fillRect(0, 0, 794, 160);
+    x1.fillStyle = 'white';
+    x1.font = 'bold 32px Arial';
+    x1.textAlign = 'center';
+    x1.fillText('Аналіз локацій для ТЦ', 397, 65);
+    x1.font = '16px Arial';
+    x1.fillStyle = '#b0bcd4';
+    x1.fillText('Alterra Location Analyzer', 397, 100);
+    x1.font = '14px Arial';
+    x1.fillStyle = '#8090a8';
+    x1.fillText(new Date().toLocaleString('uk-UA'), 397, 130);
+
+    // Рекомендація
+    x1.fillStyle = '#eef4ff';
+    roundRect(x1, 40, 185, 714, 80, 10);
+    x1.fillStyle = '#6b8fc4';
+    x1.font = '13px Arial';
+    x1.textAlign = 'left';
+    x1.fillText('РЕКОМЕНДОВАНА ЛОКАЦІЯ', 60, 215);
+    x1.fillStyle = '#1a1a2e';
+    x1.font = 'bold 24px Arial';
+    x1.fillText(`🥇 ${winner.name}`, 60, 248);
+    x1.fillStyle = '#4a6fa5';
+    x1.font = 'bold 22px Arial';
+    x1.textAlign = 'right';
+    x1.fillText(`${winner.total}/10`, 734, 248);
+
+    // Підзаголовок
+    x1.textAlign = 'left';
+    x1.fillStyle = '#999';
+    x1.font = '13px Arial';
+    x1.fillText(`Локацій: ${results.length}  ·  Пішохідний радіус: ${radii.walk}м  ·  Авто радіус: ${radii.car}м`, 40, 295);
+
+    // Таблиця скорів
+    x1.fillStyle = '#1a1a2e';
+    x1.font = 'bold 18px Arial';
+    x1.fillText('Зведений скоринг', 40, 335);
+    x1.fillStyle = '#4a6fa5';
+    x1.fillRect(40, 342, 714, 2);
+
+    // Заголовки таблиці
+    const colW = 714 / (results.length + 1);
+    x1.fillStyle = '#f5f6f8';
+    x1.fillRect(40, 350, 714, 30);
+    x1.fillStyle = '#555';
+    x1.font = 'bold 12px Arial';
+    x1.fillText('Метрика', 50, 370);
+    results.forEach((r, i) => {
+      x1.textAlign = 'center';
+      x1.fillText(r.name.substring(0, 14), 40 + colW*(i+1) + colW/2, 370);
+    });
+    x1.textAlign = 'left';
+
+    // Рядки метрик
+    const metricRows = [
+      ['🚶 Пішохідний', 'pedestrian'],
+      ['🚌 Транспорт', 'transit'],
+      ['🚗 Дороги', 'roads'],
+      ['🚦 Трафік HERE', 'traffic'],
+      ['🅿️ Паркінги', 'parking'],
+      ['🏘️ Населеність', 'population'],
+      ['🏫 Генератори', 'generators'],
+      ['🏪 Без конк.', 'competition'],
+    ];
+
+    let ty = 385;
+    metricRows.forEach((row, ri) => {
+      x1.fillStyle = ri % 2 === 0 ? 'white' : '#fafbfc';
+      x1.fillRect(40, ty, 714, 26);
+      x1.fillStyle = '#444';
+      x1.font = '12px Arial';
+      x1.fillText(row[0], 50, ty + 17);
+      results.forEach((r, i) => {
+        const sc = r.scores?.[row[1]] ?? 0;
+        const isMax = results.every(rr => (rr.scores?.[row[1]]||0) <= sc);
+        x1.fillStyle = isMax ? '#27ae60' : '#555';
+        x1.font = isMax ? 'bold 12px Arial' : '12px Arial';
+        x1.textAlign = 'center';
+        x1.fillText(`${sc}/10`, 40 + colW*(i+1) + colW/2, ty + 17);
+      });
+      x1.textAlign = 'left';
+      ty += 26;
+    });
+
+    // Підсумок
+    x1.fillStyle = '#1a1a2e';
+    x1.fillRect(40, ty, 714, 32);
+    x1.fillStyle = 'white';
+    x1.font = 'bold 13px Arial';
+    x1.fillText('⭐ ЗАГАЛЬНИЙ СКОР', 50, ty + 21);
+    results.forEach((r, i) => {
+      x1.textAlign = 'center';
+      x1.fillText(`${r.total}/10`, 40 + colW*(i+1) + colW/2, ty + 21);
+    });
+    x1.textAlign = 'left';
+    ty += 50;
+
+    // Детальний аналіз — по 2 локації на сторінку
+    results.forEach((r, ri) => {
+      if (ri > 0 && ri % 2 === 0) ty = 40; // нова сторінка
+      const locColors = [[231,76,60],[52,152,219],[39,174,96],[243,156,18],[155,89,182]];
+      const [lr, lg, lb] = locColors[ri % 5];
+
+      x1.fillStyle = `rgb(${lr},${lg},${lb})`;
+      x1.fillRect(40, ty, 714, 32);
+      x1.fillStyle = 'white';
+      x1.font = 'bold 16px Arial';
+      x1.fillText(`${medals[ri]} ${r.name}`, 50, ty + 22);
+      x1.textAlign = 'right';
+      x1.fillText(`${r.total}/10`, 734, ty + 22);
+      x1.textAlign = 'left';
+      ty += 40;
+
+      if (r.address?.district || r.address?.city) {
+        x1.fillStyle = '#777';
+        x1.font = '12px Arial';
+        x1.fillText(`📍 ${r.address.district} ${r.address.city}`.trim(), 50, ty);
+        ty += 20;
+      }
+
+      // Скор-бари
+      const mkeys = [
+        ['🚶 Пішохідна інфраструктура', 'pedestrian'],
+        ['🚌 Громадський транспорт', 'transit'],
+        ['🅿️ Паркінги', 'parking'],
+        ['🏫 Генератори трафіку', 'generators'],
+        ['🏪 Без конкурентів', 'competition'],
+        ['🏘️ Населеність', 'population'],
+      ];
+
+      mkeys.forEach(([label, key]) => {
+        const sc = r.scores?.[key] ?? 5;
+        const barW = Math.max(4, (sc / 10) * 460);
+        const barColor = sc >= 7 ? '#27ae60' : sc >= 4 ? '#f39c12' : '#e74c3c';
+
+        x1.fillStyle = '#555';
+        x1.font = '11px Arial';
+        x1.fillText(label, 50, ty + 12);
+        x1.fillStyle = '#eee';
+        x1.fillRect(220, ty, 460, 14);
+        x1.fillStyle = barColor;
+        x1.fillRect(220, ty, barW, 14);
+        x1.fillStyle = '#333';
+        x1.font = 'bold 11px Arial';
+        x1.textAlign = 'right';
+        x1.fillText(`${sc}/10`, 734, ty + 12);
+        x1.textAlign = 'left';
+        ty += 22;
+      });
+
+      if (r.traffic) {
+        x1.fillStyle = '#666';
+        x1.font = '11px Arial';
+        const tStatus = r.traffic.congestion_index <= 3 ? '🟢 Вільно' : r.traffic.congestion_index <= 6 ? '🟡 Помірно' : '🔴 Затори';
+        x1.fillText(`Трафік: ${tStatus} · ${r.traffic.avg_speed_kmh} км/г · Затори: ${r.traffic.congestion_index}/10`, 50, ty);
+        ty += 20;
+      }
+
+      ty += 20;
+    });
+
+    // Колонтитул
+    x1.fillStyle = '#ddd';
+    x1.fillRect(40, 1080, 714, 1);
+    x1.fillStyle = '#aaa';
+    x1.font = '11px Arial';
+    x1.fillText(`Alterra Group · Аналіз локацій для ТЦ · ${date}`, 40, 1100);
+    x1.textAlign = 'right';
+    x1.fillText('1 / 1', 754, 1100);
+
+    // Додаємо в PDF
+    const imgData = c1.toDataURL('image/jpeg', 0.95);
+    doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+
+    const fname = `TC_Analysis_${date.replace(/\./g,'-')}.pdf`;
+    doc.save(fname);
+
+  } catch(e) {
+    alert('Помилка генерації PDF: ' + e.message);
+    console.error(e);
+  }
+
+  btn.textContent = '📄 PDF звіт';
+  btn.disabled = false;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+}
+
+// ─── РУЧНІ ОБ'ЄКТИ ───────────────────────────────────────────
+const MANUAL_TYPES = [
+  { key: 'construction', label: '🏗️ Будівництво',     color: '#888888', affect: false },
+  { key: 'competitor',   label: '🏪 Новий ТЦ/магазин', color: '#e67e22', affect: true  },
+  { key: 'residential',  label: '🏢 Новий ЖК',         color: '#7f8c8d', affect: false },
+  { key: 'other',        label: '📍 Інше',              color: '#95a5a6', affect: false },
+];
+
+function saveManualObjects() {
+  localStorage.setItem('tc_manual_objects', JSON.stringify(manualObjects));
+}
+
+function renderManualLayer() {
+  if (manualLayer) { lmap.removeLayer(manualLayer); manualLayer = null; }
+  if (!lmap) return;
+  manualLayer = L.layerGroup();
+  manualObjects.forEach((obj, idx) => {
+    const t = MANUAL_TYPES.find(t => t.key === obj.type) || MANUAL_TYPES[3];
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="
+        width:32px;height:32px;border-radius:50%;
+        background:${t.color};border:3px solid white;
+        box-shadow:0 2px 8px rgba(0,0,0,0.35);
+        display:flex;align-items:center;justify-content:center;
+        font-size:14px;cursor:pointer;
+        ${obj.affect ? 'border:3px dashed #c0392b;' : ''}
+      ">${t.label.split(' ')[0]}</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    });
+    const m = L.marker([obj.lat, obj.lon], { icon });
+    let tip = `<b>${obj.name}</b><br><span style="color:#888">${t.label}</span>`;
+    if (obj.note) tip += `<br><i>${obj.note}</i>`;
+    if (obj.affect) tip += `<br><span style="color:#e74c3c;font-size:11px">⚠️ Впливає на скоринг</span>`;
+    tip += `<br><span style="font-size:11px;color:#aaa;cursor:pointer" onclick="deleteManualObject(${idx})">🗑️ Видалити</span>`;
+    m.bindPopup(tip, { maxWidth: 220 });
+    m.addTo(manualLayer);
+  });
+  manualLayer.addTo(lmap);
+}
+
+function deleteManualObject(idx) {
+  manualObjects.splice(idx, 1);
+  saveManualObjects();
+  renderManualLayer();
+  updateManualPanel();
+}
+
+function toggleManualMode() {
+  manualMode = !manualMode;
+  const btn = document.getElementById('btn-manual');
+  if (manualMode) {
+    btn.classList.add('on');
+    btn.textContent = '✏️ Клікніть на карту...';
+    lmap.getContainer().style.cursor = 'crosshair';
+  } else {
+    btn.classList.remove('on');
+    btn.textContent = '✏️ Мої об\u02BCєкти';
+    lmap.getContainer().style.cursor = '';
+  }
+  showManualPanel();
+}
+
+function showManualPanel() {
+  let panel = document.getElementById('manual-panel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'manual-panel';
+    panel.style.cssText = `
+      position:absolute;top:10px;right:10px;z-index:1100;
+      background:white;border-radius:12px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.18);
+      padding:14px 16px;min-width:220px;max-width:260px;
+      font-family:sans-serif;font-size:13px;
+    `;
+    document.getElementById('tab-map').appendChild(panel);
+  }
+  updateManualPanel();
+  panel.style.display = 'block';
+}
+
+function updateManualPanel() {
+  const panel = document.getElementById('manual-panel');
+  if (!panel) return;
+  const count = manualObjects.length;
+  const affectCount = manualObjects.filter(o => o.affect).length;
+  panel.innerHTML = `
+    <div style="font-weight:700;font-size:14px;color:#1a2b4a;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+      ✏️ Мої об'єкти
+      <span style="font-size:11px;color:#aaa;cursor:pointer" onclick="closeManualPanel()">✕</span>
+    </div>
+    <div style="font-size:11px;color:#888;margin-bottom:10px;line-height:1.5">
+      ${manualMode
+        ? '<b style="color:#2E6DB4">🎯 Клікніть на карту щоб додати об\'єкт</b>'
+        : `Збережено: <b>${count}</b> об'єктів${affectCount ? ` (${affectCount} впливає на скоринг)` : ''}`
+      }
+    </div>
+    ${manualObjects.length > 0 ? `
+    <div style="max-height:160px;overflow-y:auto;margin-bottom:10px">
+      ${manualObjects.map((o,i) => {
+        const t = MANUAL_TYPES.find(t=>t.key===o.type)||MANUAL_TYPES[3];
+        return `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #f5f5f5">
+          <span>${t.label.split(' ')[0]}</span>
+          <span style="flex:1;font-size:12px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.name}</span>
+          ${o.affect ? '<span style="color:#e74c3c;font-size:10px">⚠️</span>' : ''}
+          <span style="color:#ccc;cursor:pointer;font-size:11px" onclick="deleteManualObject(${i})">🗑️</span>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button onclick="toggleManualMode()" style="flex:1;padding:5px 8px;border-radius:8px;border:1px solid ${manualMode ? '#2E6DB4' : '#ddd'};background:${manualMode ? '#EBF3FB' : '#fafafa'};cursor:pointer;font-size:11px;color:${manualMode ? '#2E6DB4' : '#555'}">
+        ${manualMode ? '⏹ Стоп' : '➕ Додати'}
+      </button>
+      ${count > 0 ? `<button onclick="clearAllManual()" style="padding:5px 8px;border-radius:8px;border:1px solid #fcc;background:#fff5f5;cursor:pointer;font-size:11px;color:#e74c3c">🗑️ Очистити</button>` : ''}
+    </div>
+  `;
+}
+
+function closeManualPanel() {
+  const panel = document.getElementById('manual-panel');
+  if (panel) panel.style.display = 'none';
+  if (manualMode) toggleManualMode();
+}
+
+function clearAllManual() {
+  if (!confirm('Видалити всі об\'єкти?')) return;
+  manualObjects = [];
+  saveManualObjects();
+  renderManualLayer();
+  updateManualPanel();
+}
+
+// Попап для додавання об'єкта (з'являється після кліку на карту)
+function showAddObjectPopup(lat, lon) {
+  const existing = document.getElementById('add-obj-popup');
+  if (existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'add-obj-popup';
+  popup.style.cssText = `
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    z-index:9999;background:white;border-radius:14px;
+    box-shadow:0 8px 40px rgba(0,0,0,0.22);
+    padding:20px 22px;width:300px;font-family:sans-serif;
+  `;
+  popup.innerHTML = `
+    <div style="font-weight:700;font-size:15px;color:#1a2b4a;margin-bottom:14px">
+      📍 Новий об'єкт
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:12px;color:#888;display:block;margin-bottom:4px">Назва *</label>
+      <input id="mo-name" type="text" placeholder="Наприклад: ЖК Сонячний" style="
+        width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ddd;
+        border-radius:8px;font-size:13px;outline:none
+      ">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:12px;color:#888;display:block;margin-bottom:4px">Тип</label>
+      <select id="mo-type" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none">
+        ${MANUAL_TYPES.map(t => `<option value="${t.key}">${t.label}</option>`).join('')}
+      </select>
+    </div>
+    <div id="mo-affect-row" style="margin-bottom:10px;display:none">
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#555;cursor:pointer">
+        <input type="checkbox" id="mo-affect" style="width:16px;height:16px">
+        Враховувати в скорингу (знижує бал конкурентів)
+      </label>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;color:#888;display:block;margin-bottom:4px">Нотатка</label>
+      <input id="mo-note" type="text" placeholder="Необов'язково" style="
+        width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ddd;
+        border-radius:8px;font-size:13px;outline:none
+      ">
+    </div>
+    <div style="font-size:11px;color:#aaa;margin-bottom:14px">
+      📌 ${lat.toFixed(5)}, ${lon.toFixed(5)}
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="saveManualObject(${lat},${lon})" style="
+        flex:1;padding:9px;border-radius:9px;border:none;
+        background:#1a2b4a;color:white;font-size:13px;font-weight:600;cursor:pointer
+      ">Зберегти</button>
+      <button onclick="document.getElementById('add-obj-popup').remove()" style="
+        padding:9px 14px;border-radius:9px;border:1px solid #ddd;
+        background:white;font-size:13px;cursor:pointer;color:#555
+      ">Скасувати</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  // Показати чекбокс "впливає на скоринг" тільки для конкурентів
+  document.getElementById('mo-type').addEventListener('change', function() {
+    const t = MANUAL_TYPES.find(t => t.key === this.value);
+    document.getElementById('mo-affect-row').style.display = t && t.affect ? 'block' : 'none';
+    if (t && t.affect) document.getElementById('mo-affect').checked = true;
+  });
+  // Тригернути для першого значення
+  document.getElementById('mo-type').dispatchEvent(new Event('change'));
+  setTimeout(() => document.getElementById('mo-name').focus(), 100);
+}
+
+function saveManualObject(lat, lon) {
+  const name = document.getElementById('mo-name').value.trim();
+  if (!name) { document.getElementById('mo-name').style.borderColor = '#e74c3c'; return; }
+  const type = document.getElementById('mo-type').value;
+  const note = document.getElementById('mo-note').value.trim();
+  const affect = document.getElementById('mo-affect') && document.getElementById('mo-affect').checked;
+
+  manualObjects.push({ lat, lon, name, type, note, affect });
+  saveManualObjects();
+  renderManualLayer();
+  updateManualPanel();
+  document.getElementById('add-obj-popup').remove();
+}
+
+// ─── ШАР БУДІВНИЦТВА (e-construction.gov.ua) ─────────────────
+async function loadConstructionData() {
+  if (constructionData) return constructionData;
+  try {
+    const url = 'https://kirdanova14.github.io/tc-dashboard/construction_permits.json?t=' + Date.now();
+    const resp = await fetch(url, { cache: 'no-store' });
+    if (!resp.ok) throw new Error('not found');
+    constructionData = await resp.json();
+    return constructionData;
+  } catch(e) {
+    console.warn('construction_permits.json не знайдено на GitHub:', e.message);
+    return null;
+  }
+}
+
+function renderConstructionLayer(data) {
+  if (constructionLayer) { lmap.removeLayer(constructionLayer); constructionLayer = null; }
+  if (!data || !data.length) return;
+
+  constructionLayer = L.layerGroup();
+
+  // Фільтр: показуємо тільки активні дозволи (status=2) і всі типи крім приватних
+  const visible = data.filter(d => d.status === 2 || d.status === 7);
+
+  visible.forEach(obj => {
+    const style = CONSTRUCTION_STYLES[obj.category] || { color: '#888', label: '🏗️ Будівництво' };
+    const isActive = obj.status === 2;
+
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="
+        width:${isActive ? 14 : 11}px;
+        height:${isActive ? 14 : 11}px;
+        border-radius:3px;
+        background:${isActive ? style.color : '#bbb'};
+        border:2px solid white;
+        box-shadow:0 1px 4px rgba(0,0,0,0.3);
+        opacity:${isActive ? 0.9 : 0.5};
+      "></div>`,
+      iconSize: [isActive ? 14 : 11, isActive ? 14 : 11],
+      iconAnchor: [isActive ? 7 : 5, isActive ? 7 : 5],
+    });
+
+    const statusLabel = isActive ? '✅ Активний дозвіл' : '⬜ Завершено / архів';
+    const popup = `
+      <div style="font-family:sans-serif;font-size:12px;max-width:240px">
+        <div style="font-weight:700;color:#1a2b4a;margin-bottom:4px">${obj.name}</div>
+        <div style="color:${style.color};margin-bottom:4px">${style.label}</div>
+        <div style="color:#888;font-size:11px">${statusLabel}</div>
+        ${obj.city ? `<div style="color:#aaa;font-size:10px;margin-top:3px">📍 ${obj.city}${obj.region ? ', ' + obj.region : ''}</div>` : ''}
+        ${obj.address ? `<div style="color:#aaa;font-size:10px">${obj.address}</div>` : ''}
+        <div style="color:#aaa;font-size:10px;margin-top:3px">📅 ${obj.date}</div>
+        <div style="color:#c0392b;font-size:10px;margin-top:4px;font-style:italic">⚠️ Дані станом на 22.02.2022</div>
+      </div>`;
+
+    L.marker([obj.lat, obj.lon], { icon })
+      .bindPopup(popup, { maxWidth: 260 })
+      .addTo(constructionLayer);
+  });
+
+  if (showConstruction) constructionLayer.addTo(lmap);
+}
+
+async function toggleConstructionLayer() {
+  showConstruction = !showConstruction;
+  const btn = document.getElementById('btn-construction');
+
+  if (showConstruction) {
+    btn.classList.add('on');
+    btn.textContent = '🏗️ Завантаження...';
+    btn.disabled = true;
+
+    const data = await loadConstructionData();
+    btn.disabled = false;
+
+    if (!data) {
+      showConstruction = false;
+      btn.classList.remove('on');
+      btn.textContent = '🏗️ Будівництво';
+      alert('Файл construction_permits.json не знайдено на GitHub.\nЗавантажте його в репозиторій kirdanova14/tc-dashboard');
+      return;
+    }
+
+    renderConstructionLayer(data);
+    btn.textContent = '🏗️ Будівництво ✓';
+
+    // Показати легенду будівництва
+    showConstructionLegend();
+  } else {
+    btn.classList.remove('on');
+    btn.textContent = '🏗️ Будівництво';
+    if (constructionLayer) lmap.removeLayer(constructionLayer);
+    const leg = document.getElementById('construction-legend');
+    if (leg) leg.remove();
+  }
+}
+
+function showConstructionLegend() {
+  const old = document.getElementById('construction-legend');
+  if (old) old.remove();
+
+  const leg = document.createElement('div');
+  leg.id = 'construction-legend';
+  leg.style.cssText = `
+    position:absolute;bottom:60px;left:10px;z-index:998;background:white;
+    border-radius:10px;box-shadow:0 2px 14px rgba(0,0,0,0.14);
+    padding:12px 14px;font-family:sans-serif;font-size:12px;min-width:180px;
+  `;
+  leg.innerHTML = `
+    <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:#1a2b4a;display:flex;justify-content:space-between">
+      🏗️ Дозволи на будівництво
+      <span style="color:#aaa;cursor:pointer;font-weight:400" onclick="toggleConstructionLayer()">✕</span>
+    </div>
+    <div style="font-size:10px;color:#e74c3c;margin-bottom:8px;font-style:italic">⚠️ Дані станом на 22.02.2022</div>
+    ${Object.entries(CONSTRUCTION_STYLES).map(([key, s]) => `
+      <div style="display:flex;align-items:center;gap:7px;padding:3px 0">
+        <div style="width:12px;height:12px;border-radius:2px;background:${s.color};flex-shrink:0"></div>
+        <span style="color:#555">${s.label}</span>
+      </div>`).join('')}
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid #f0f0f0;font-size:10px;color:#aaa">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">
+        <div style="width:12px;height:12px;border-radius:2px;background:#bbb;flex-shrink:0;opacity:0.5"></div>
+        <span>Завершено / архів</span>
+      </div>
+      Активні дозволи — яскравіші
+    </div>
+  `;
+  document.getElementById('tab-map').appendChild(leg);
+}
+
+init();
+</script>
+<!-- Модальне вікно збережених результатів -->
+<div id="saved-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:14px;width:680px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="padding:20px 24px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between">
+      <h2 style="font-size:16px;font-weight:700">📁 Збережені аналізи</h2>
+      <button onclick="document.getElementById('saved-modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#aaa">×</button>
+    </div>
+    <div id="saved-list" style="flex:1;overflow-y:auto;padding:16px"></div>
+  </div>
+</div>
+
+<!-- PDF звіт (прихований, для рендеру) -->
+<div id="pdf-report" style="display:none;position:fixed;left:-9999px;top:0;width:794px;background:white;font-family:Arial,sans-serif;padding:40px"></div>
+
+</body>
+</html>
