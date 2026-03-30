@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-03-30T06:45:47.032371",
+    "generated": "2026-03-30T11:21:54.641313",
     "radius_walk": 500,
     "radius_car": 1500
   },
@@ -475,7 +475,7 @@
         "in_walk_radius": false
       }
     ],
-    "collected_at": "2026-03-30T06:45:55.000006",
+    "collected_at": "2026-03-30T11:22:02.429299",
     "population_walk": 1927,
     "population_car": 9405,
     "population_heatmap": [
@@ -670,7 +670,7 @@
         "lon": 28.4075451,
         "name": "Tereveni",
         "rating": 4.5,
-        "reviews": 2270,
+        "reviews": 2271,
         "type": "restaurant",
         "weight": 1.0,
         "in_walk_radius": false
@@ -1086,7 +1086,7 @@
         "in_walk_radius": false
       }
     ],
-    "collected_at": "2026-03-30T06:46:03.042925",
+    "collected_at": "2026-03-30T11:22:10.475143",
     "population_walk": 823,
     "population_car": 12103,
     "population_heatmap": [
