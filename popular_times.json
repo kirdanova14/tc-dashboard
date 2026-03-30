@@ -1,17 +1,17 @@
 {
   "_meta": {
-    "generated": "2026-03-30T13:26:23.895979",
-    "radius_walk": 300,
+    "generated": "2026-03-30T15:07:08.392586",
+    "radius_walk": 500,
     "radius_car": 1000
   },
   "Дубно кіно": {
-    "peak": 34,
-    "morning": 20,
+    "peak": 33,
+    "morning": 19,
     "evening": 28,
-    "weekend": 30,
-    "walk_radius": 300,
+    "weekend": 29,
+    "walk_radius": 500,
     "car_radius": 1000,
-    "walk_places_count": 31,
+    "walk_places_count": 38,
     "car_places_count": 41,
     "heatmap_points": [
       {
@@ -32,7 +32,7 @@
         "reviews": 11,
         "type": "shopping_mall",
         "weight": 1.0,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.407956,
@@ -52,7 +52,7 @@
         "reviews": 239,
         "type": "supermarket",
         "weight": 1.0,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.40379,
@@ -172,7 +172,7 @@
         "reviews": 32,
         "type": "cafe",
         "weight": 1.0,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.4037582,
@@ -182,7 +182,7 @@
         "reviews": 32,
         "type": "cafe",
         "weight": 1.0,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.406944,
@@ -252,7 +252,7 @@
         "reviews": 3,
         "type": "market",
         "weight": 0.374,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.40220619999999,
@@ -302,7 +302,7 @@
         "reviews": 0,
         "type": "school",
         "weight": 0.1,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.4107728,
@@ -312,7 +312,7 @@
         "reviews": 0,
         "type": "school",
         "weight": 0.1,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.4080541,
@@ -332,7 +332,7 @@
         "reviews": 6,
         "type": "school",
         "weight": 0.642,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.407985,
@@ -422,10 +422,10 @@
         "reviews": 2,
         "type": "pharmacy",
         "weight": 0.549,
-        "in_walk_radius": false
+        "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-03-30T13:26:32.109365",
+    "collected_at": "2026-03-30T15:07:17.156912",
     "population_walk": 3089,
     "population_car": 8350,
     "population_heatmap": [
@@ -462,13 +462,13 @@
     ]
   },
   "Дубно епіцентр": {
-    "peak": 32,
-    "morning": 19,
-    "evening": 27,
-    "weekend": 28,
-    "walk_radius": 300,
+    "peak": 31,
+    "morning": 18,
+    "evening": 26,
+    "weekend": 27,
+    "walk_radius": 500,
     "car_radius": 1000,
-    "walk_places_count": 28,
+    "walk_places_count": 39,
     "car_places_count": 44,
     "heatmap_points": [
       {
@@ -489,7 +489,7 @@
         "reviews": 12,
         "type": "shopping_mall",
         "weight": 0.59,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.395177,
@@ -559,7 +559,7 @@
         "reviews": 106,
         "type": "restaurant",
         "weight": 1.0,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.3907579,
@@ -569,7 +569,7 @@
         "reviews": 545,
         "type": "restaurant",
         "weight": 1.0,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.3986832,
@@ -629,7 +629,7 @@
         "reviews": 19,
         "type": "cafe",
         "weight": 1.0,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.38653000000001,
@@ -669,7 +669,7 @@
         "reviews": 0,
         "type": "transit_station",
         "weight": 0.1,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.390997,
@@ -679,7 +679,7 @@
         "reviews": 0,
         "type": "transit_station",
         "weight": 0.1,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.4009139,
@@ -719,7 +719,7 @@
         "reviews": 46,
         "type": "market",
         "weight": 1.0,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.396455,
@@ -739,7 +739,7 @@
         "reviews": 2,
         "type": "gym",
         "weight": 0.549,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.3920668,
@@ -749,7 +749,7 @@
         "reviews": 55,
         "type": "gym",
         "weight": 1.0,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.3962772,
@@ -769,7 +769,7 @@
         "reviews": 1,
         "type": "park",
         "weight": 0.347,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.39457229999999,
@@ -779,7 +779,7 @@
         "reviews": 0,
         "type": "school",
         "weight": 0.1,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.3946271,
@@ -789,7 +789,7 @@
         "reviews": 0,
         "type": "school",
         "weight": 0.1,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.3980249,
@@ -799,7 +799,7 @@
         "reviews": 0,
         "type": "school",
         "weight": 0.1,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.3956154,
@@ -849,7 +849,7 @@
         "reviews": 2,
         "type": "bank",
         "weight": 0.439,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 50.4024318,
@@ -912,8 +912,8 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-03-30T13:26:39.808191",
-    "population_walk": 0,
+    "collected_at": "2026-03-30T15:07:25.265009",
+    "population_walk": 1358,
     "population_car": 5486,
     "population_heatmap": [
       {
@@ -944,7 +944,7 @@
         "lat": 50.39305,
         "lon": 25.75288,
         "pop": 1358,
-        "in_walk": false
+        "in_walk": true
       }
     ]
   }
