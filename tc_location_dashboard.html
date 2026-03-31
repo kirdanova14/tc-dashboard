@@ -982,27 +982,52 @@ function renderPopularTimesTab() {
   });
 }
 
-function scoreAll(res) {
-  const keys=['pedestrian','transit','roads','traffic','parking','population','generators','competition','terrain','accessibility'];
-  const inv=new Set(['competition']);
-  const mn={},mx={};
-  keys.forEach(k=>{ mn[k]=Math.min(...res.map(r=>r.raw[k])); mx[k]=Math.max(...res.map(r=>r.raw[k])); });
-  const W=getWeights();
-  const tw=Object.values(W).reduce((a,b)=>a+b,0)||100;
-  res.forEach(r=>{
-    r.scores={};
-    keys.forEach(k=>{ r.scores[k]=norm(r.raw[k],mn[k],mx[k],inv.has(k)); });
+// ─── АБСОЛЮТНІ ПОРОГИ СКОРИНГУ ───────────────
+// raw-значення що відповідає 10/10 для кожної метрики.
+// Відкалібровано для українських міст, радіус аналізу ~1-1.5 км.
+// Менше порогу — пропорційний бал від 1 до 10.
+const SCORE_CAPS = {
+  pedestrian:   500,  // тротуари, переходи, пішохідні шляхи (великий центр ~500)
+  transit:       60,  // автобуси, трамваї, метро (30 зупинок*2 = 60)
+  roads:         80,  // дороги різного рівня
+  traffic:      100,  // HERE score 0–100 (завжди в цьому діапазоні)
+  parking:       45,  // ~15 парковок * 3
+  population:   200,  // щільність POI та житла
+  generators:   100,  // школи, лікарні, ринки, офіси
+  competition:   30,  // інвертована: 3 ТЦ*10 = насичений ринок
+  terrain:      100,  // рельєф (raw=50 за замовч → ~5.5)
+  accessibility: 100, // від центру (raw 5–100 залежно від відстані)
+};
 
-    // Якщо є ручні дані пішохідного трафіку — замінюємо авто-розрахунок
+// Перетворення raw → бал 1..10 за абсолютними порогами
+function scoreMetric(raw, cap, inv=false) {
+  const ratio = Math.min(raw, cap) / cap; // 0..1
+  const s = inv ? (1 - ratio) * 9 + 1 : ratio * 9 + 1; // [1..10]
+  return Math.round(s * 10) / 10;
+}
+
+function scoreAll(res) {
+  const keys = Object.keys(SCORE_CAPS);
+  const inv  = new Set(['competition']);
+  const W    = getWeights();
+  const tw   = Object.values(W).reduce((a,b)=>a+b,0)||100;
+
+  res.forEach(r => {
+    r.scores = {};
+    keys.forEach(k => {
+      r.scores[k] = scoreMetric(r.raw[k] || 0, SCORE_CAPS[k], inv.has(k));
+    });
+
+    // Ручний пішохідний трафік — замінює авто-розрахунок
     const pedManual = getPedScore(r.name);
     if (pedManual !== null) {
       r.scores.pedestrian = Math.round(pedManual / 10 * 10) / 10;
       r.pedestrian_manual = true;
     }
 
-    r.total=Math.round(keys.reduce((s,k)=>s+r.scores[k]*(W[k]||0)/tw,0)*10)/10;
+    r.total = Math.round(keys.reduce((s,k) => s + r.scores[k]*(W[k]||0)/tw, 0)*10)/10;
   });
-  return res.sort((a,b)=>b.total-a.total);
+  return res.sort((a,b) => b.total - a.total);
 }
 
 // ─── АНАЛІЗ ──────────────────────────────────
@@ -1558,8 +1583,8 @@ function renderRaw() {
      keys:['metro_stations','railway_stations','tram_stops','bus_stops'],
      labels:['Метро','Залізниця','Трамвай','Автобуси']},
     {title:'🚗 Дороги та паркінги',
-     keys:['motorways','primary_roads','secondary_roads','parking_lots','parking_garages'],
-     labels:['Магістралі','Головні вулиці','Другорядні','Паркінги','Паркінг-гаражі']},
+     keys:['motorways','primary_roads','secondary_roads','tertiary_roads','parking_lots','parking_garages'],
+     labels:['Магістралі','Головні вулиці','Другорядні','Третьорядні','Паркінги','Паркінг-гаражі']},
     {title:'🏫 Генератори трафіку',
      keys:['schools','universities','offices_node','markets','hospitals','cinemas','sports','parks','cnap_count','post_offices','townhalls','community'],
      labels:['Школи','Університети','Офіси','Ринки','Лікарні','Кіно/театри','Спорт','Парки','ЦНАП/держ.','Пошта','Міськрада','Громад. центри']},
