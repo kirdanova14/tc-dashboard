@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "generated": "2026-03-31T11:58:20.936891",
+    "generated": "2026-03-31T12:07:30.371554",
     "radius_walk": 500,
-    "radius_car": 1500
+    "radius_car": 1000
   },
   "Дубно кіно": {
     "peak": 33,
@@ -10,9 +10,9 @@
     "evening": 28,
     "weekend": 29,
     "walk_radius": 500,
-    "car_radius": 1500,
+    "car_radius": 1000,
     "walk_places_count": 38,
-    "car_places_count": 47,
+    "car_places_count": 41,
     "heatmap_points": [
       {
         "lat": 50.40908470000001,
@@ -32,16 +32,6 @@
         "reviews": 11,
         "type": "shopping_mall",
         "weight": 1.0,
-        "in_walk_radius": false
-      },
-      {
-        "lat": 50.398163,
-        "lon": 25.7576341,
-        "name": "КВІТИ +",
-        "rating": 2.3,
-        "reviews": 12,
-        "type": "shopping_mall",
-        "weight": 0.59,
         "in_walk_radius": false
       },
       {
@@ -255,16 +245,6 @@
         "in_walk_radius": false
       },
       {
-        "lat": 50.40220619999999,
-        "lon": 25.7580158,
-        "name": "Ispolin, Lyvarno-Mekhanichnyy Zavod",
-        "rating": 2,
-        "reviews": 2,
-        "type": "market",
-        "weight": 0.22,
-        "in_walk_radius": false
-      },
-      {
         "lat": 50.4097346,
         "lon": 25.7604504,
         "name": "Aldeks",
@@ -275,13 +255,13 @@
         "in_walk_radius": true
       },
       {
-        "lat": 50.4045558,
-        "lon": 25.77519599999999,
-        "name": "Ufa-Nova, Pp",
-        "rating": 4.2,
-        "reviews": 5,
+        "lat": 50.40220619999999,
+        "lon": 25.7580158,
+        "name": "Ispolin, Lyvarno-Mekhanichnyy Zavod",
+        "rating": 2,
+        "reviews": 2,
         "type": "market",
-        "weight": 0.753,
+        "weight": 0.22,
         "in_walk_radius": false
       },
       {
@@ -295,14 +275,14 @@
         "in_walk_radius": true
       },
       {
-        "lat": 50.3962772,
-        "lon": 25.764086,
-        "name": "Stadion",
-        "rating": 0,
-        "reviews": 0,
-        "type": "gym",
-        "weight": 0.1,
-        "in_walk_radius": false
+        "lat": 50.4064494,
+        "lon": 25.761201,
+        "name": "Windows \"Corsa\"",
+        "rating": 4.8,
+        "reviews": 18,
+        "type": "market",
+        "weight": 1.0,
+        "in_walk_radius": true
       },
       {
         "lat": 50.40650720000001,
@@ -355,16 +335,6 @@
         "in_walk_radius": false
       },
       {
-        "lat": 50.39631969999999,
-        "lon": 25.7588298,
-        "name": "Dubno City Polyclinic",
-        "rating": 2.5,
-        "reviews": 25,
-        "type": "hospital",
-        "weight": 0.815,
-        "in_walk_radius": false
-      },
-      {
         "lat": 50.407985,
         "lon": 25.76362899999999,
         "name": "BeautyDerm | Центр естетичної медицини, дерматології та косметології | Дубно",
@@ -385,26 +355,6 @@
         "in_walk_radius": true
       },
       {
-        "lat": 50.39654650000001,
-        "lon": 25.7570873,
-        "name": "Medychni Dovidky",
-        "rating": 0,
-        "reviews": 0,
-        "type": "hospital",
-        "weight": 0.1,
-        "in_walk_radius": false
-      },
-      {
-        "lat": 50.3960653,
-        "lon": 25.75869519999999,
-        "name": "Pulynskiy Tsentr Pervynnoyi Medyko-Sanitarnoyi Dopomohy",
-        "rating": 3,
-        "reviews": 2,
-        "type": "hospital",
-        "weight": 0.33,
-        "in_walk_radius": false
-      },
-      {
         "lat": 50.4024318,
         "lon": 25.7589809,
         "name": "Oschadbank",
@@ -423,16 +373,6 @@
         "type": "bank",
         "weight": 0.1,
         "in_walk_radius": true
-      },
-      {
-        "lat": 50.4166667,
-        "lon": 25.75,
-        "name": "Praveks-Bank, Pat Kb, Dubensʹke Viddilennya",
-        "rating": 0,
-        "reviews": 0,
-        "type": "bank",
-        "weight": 0.1,
-        "in_walk_radius": false
       },
       {
         "lat": 50.40759250000001,
@@ -485,32 +425,14 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-03-31T11:58:31.799888",
+    "collected_at": "2026-03-31T12:07:40.483507",
     "population_walk": 3089,
-    "population_car": 12528,
+    "population_car": 8350,
     "population_heatmap": [
-      {
-        "lat": 50.39769,
-        "lon": 25.76337,
-        "pop": 1045,
-        "in_walk": false
-      },
-      {
-        "lat": 50.40081,
-        "lon": 25.75116,
-        "pop": 1513,
-        "in_walk": false
-      },
       {
         "lat": 50.41321,
         "lon": 25.75993,
         "pop": 2423,
-        "in_walk": false
-      },
-      {
-        "lat": 50.41785,
-        "lon": 25.77042,
-        "pop": 369,
         "in_walk": false
       },
       {
@@ -532,12 +454,6 @@
         "in_walk": false
       },
       {
-        "lat": 50.41632,
-        "lon": 25.74772,
-        "pop": 1251,
-        "in_walk": false
-      },
-      {
         "lat": 50.40856,
         "lon": 25.74944,
         "pop": 503,
@@ -551,9 +467,9 @@
     "evening": 26,
     "weekend": 27,
     "walk_radius": 500,
-    "car_radius": 1500,
+    "car_radius": 1000,
     "walk_places_count": 37,
-    "car_places_count": 46,
+    "car_places_count": 44,
     "heatmap_points": [
       {
         "lat": 50.3932108,
@@ -574,16 +490,6 @@
         "type": "shopping_mall",
         "weight": 0.59,
         "in_walk_radius": true
-      },
-      {
-        "lat": 50.40375820000001,
-        "lon": 25.7603084,
-        "name": "ТЦ «MAGIC CITY»",
-        "rating": 4.5,
-        "reviews": 11,
-        "type": "shopping_mall",
-        "weight": 1.0,
-        "in_walk_radius": false
       },
       {
         "lat": 50.395177,
@@ -623,16 +529,6 @@
         "reviews": 6,
         "type": "supermarket",
         "weight": 0.837,
-        "in_walk_radius": false
-      },
-      {
-        "lat": 50.40379,
-        "lon": 25.7602,
-        "name": "Аврора",
-        "rating": 5,
-        "reviews": 1,
-        "type": "supermarket",
-        "weight": 0.347,
         "in_walk_radius": false
       },
       {
@@ -796,16 +692,6 @@
         "in_walk_radius": false
       },
       {
-        "lat": 50.40220619999999,
-        "lon": 25.7580158,
-        "name": "Ispolin, Lyvarno-Mekhanichnyy Zavod",
-        "rating": 2,
-        "reviews": 2,
-        "type": "market",
-        "weight": 0.22,
-        "in_walk_radius": false
-      },
-      {
         "lat": 50.39631969999999,
         "lon": 25.7588298,
         "name": "Dubno City Polyclinic",
@@ -816,21 +702,31 @@
         "in_walk_radius": true
       },
       {
-        "lat": 50.3994522,
-        "lon": 25.7555166,
-        "name": "Derzhavnyy Navchalʹnyy Zaklad \"Dubensʹke Vyshche Khudozhnye Profesiyno-Tekhnichne Uchylyshche\"",
-        "rating": 4.6,
-        "reviews": 37,
-        "type": "market",
-        "weight": 1.0,
-        "in_walk_radius": false
-      },
-      {
         "lat": 50.3920288,
         "lon": 25.7620466,
         "name": "Dubnomoloko",
         "rating": 4.3,
         "reviews": 101,
+        "type": "market",
+        "weight": 1.0,
+        "in_walk_radius": false
+      },
+      {
+        "lat": 50.3973368,
+        "lon": 25.7584119,
+        "name": "House of Prayer",
+        "rating": 4.2,
+        "reviews": 46,
+        "type": "market",
+        "weight": 1.0,
+        "in_walk_radius": true
+      },
+      {
+        "lat": 50.396455,
+        "lon": 25.762813,
+        "name": "Tserkva Voznesinnya Hospodnʹoho",
+        "rating": 4.8,
+        "reviews": 53,
         "type": "market",
         "weight": 1.0,
         "in_walk_radius": false
@@ -1016,22 +912,10 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-03-31T11:58:41.135678",
+    "collected_at": "2026-03-31T12:07:50.246666",
     "population_walk": 1358,
-    "population_car": 12071,
+    "population_car": 5486,
     "population_heatmap": [
-      {
-        "lat": 50.39458,
-        "lon": 25.77558,
-        "pop": 260,
-        "in_walk": false
-      },
-      {
-        "lat": 50.39616,
-        "lon": 25.74067,
-        "pop": 357,
-        "in_walk": false
-      },
       {
         "lat": 50.39769,
         "lon": 25.76337,
@@ -1051,12 +935,6 @@
         "in_walk": false
       },
       {
-        "lat": 50.3884,
-        "lon": 25.74239,
-        "pop": 1799,
-        "in_walk": false
-      },
-      {
         "lat": 50.38993,
         "lon": 25.76509,
         "pop": 670,
@@ -1067,24 +945,6 @@
         "lon": 25.75288,
         "pop": 1358,
         "in_walk": true
-      },
-      {
-        "lat": 50.40234,
-        "lon": 25.77386,
-        "pop": 946,
-        "in_walk": false
-      },
-      {
-        "lat": 50.40545,
-        "lon": 25.76165,
-        "pop": 3089,
-        "in_walk": false
-      },
-      {
-        "lat": 50.38218,
-        "lon": 25.76681,
-        "pop": 134,
-        "in_walk": false
       }
     ]
   }
