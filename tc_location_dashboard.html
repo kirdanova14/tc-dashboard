@@ -756,7 +756,25 @@ async function fetchAddr(lat, lon) {
 }
 
 // ─── МЕТРИКИ / СКОРИНГ ───────────────────────
-function computeRaw(osm, traffic) {
+// Відстань між двома точками в км (формула Гаверсина)
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+    Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+    Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function computeRaw(osm, traffic, lat, lon, cityCenter) {
+  // Відстань від центру: чим ближче — тим вищий raw бал
+  let accessibilityRaw = 50; // дефолт якщо центр невідомий
+  if (cityCenter) {
+    const distKm = haversineKm(lat, lon, cityCenter.lat, cityCenter.lon);
+    // 0 км → 100, 5 км → 50, 10+ км → ~10
+    accessibilityRaw = Math.max(5, Math.round(100 - distKm * 9));
+  }
   return {
     pedestrian:  osm.crossings*4+osm.footways*3+osm.sidewalks*2+osm.pedestrian_zones*5,
     transit:     osm.metro_stations*15+osm.railway_stations*10+osm.tram_stops*6+osm.bus_stops*2,
@@ -770,14 +788,16 @@ function computeRaw(osm, traffic) {
     competition: osm.shopping_malls*10+osm.hypermarkets*7+osm.department_stores*5+
                  osm.retail_parks*4+osm.supermarkets*2,
     terrain:     50,
-    accessibility: 30,
+    accessibility: accessibilityRaw,
   };
 }
 
 function norm(v,mn,mx,inv=false) {
   if(mx===mn) return 5;
-  const s=(v-mn)/(mx-mn)*10;
-  return Math.round((inv?10-s:s)*10)/10;
+  // Діапазон [1..10]: найгірша локація отримує 1, найкраща — 10.
+  // Виключає некоректний 0/10 для локацій з реальною інфраструктурою.
+  const s = 1 + (v-mn)/(mx-mn)*9;
+  return Math.round((inv ? 11-s : s)*10)/10;
 }
 
 // ─── ПІШОХІДНИЙ ТРАФІК (ручне введення) ──────
@@ -1005,8 +1025,17 @@ async function runAnalysis() {
         fetchAddr(parseFloat(loc.lat), parseFloat(loc.lon)),
         fetchHereTraffic(parseFloat(loc.lat), parseFloat(loc.lon), radii.car),
       ]);
+      // Отримуємо центр міста для розрахунку accessibility
+      let cityCenter = null;
+      if (addr.city) {
+        try {
+          const gc = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addr.city)}&format=json&limit=1&featuretype=city`, {headers:{'Accept-Language':'uk'}});
+          const gcData = await gc.json();
+          if (gcData[0]) cityCenter = {lat: parseFloat(gcData[0].lat), lon: parseFloat(gcData[0].lon)};
+        } catch(e) { /* не критично */ }
+      }
       results.push({name:loc.name, lat:parseFloat(loc.lat), lon:parseFloat(loc.lon),
-        osm, raw:computeRaw(osm, traffic), address:addr, traffic});
+        osm, raw:computeRaw(osm, traffic, parseFloat(loc.lat), parseFloat(loc.lon), cityCenter), address:addr, traffic});
     } catch(e){ alert(`Помилка для ${loc.name}: ${e.message}`); }
     await new Promise(r=>setTimeout(r,1200));
   }
