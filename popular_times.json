@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-03-31T10:09:40.002586",
+    "generated": "2026-03-31T10:13:09.038555",
     "radius_walk": 500,
     "radius_car": 1000
   },
@@ -32,7 +32,7 @@
         "reviews": 11,
         "type": "shopping_mall",
         "weight": 1.0,
-        "in_walk_radius": true
+        "in_walk_radius": false
       },
       {
         "lat": 50.407956,
@@ -182,7 +182,7 @@
         "reviews": 32,
         "type": "cafe",
         "weight": 1.0,
-        "in_walk_radius": true
+        "in_walk_radius": false
       },
       {
         "lat": 50.406944,
@@ -315,16 +315,6 @@
         "in_walk_radius": true
       },
       {
-        "lat": 50.4080541,
-        "lon": 25.7568538,
-        "name": "Dubensʹka Spetsialʹna Shkola-Internat",
-        "rating": 0,
-        "reviews": 0,
-        "type": "school",
-        "weight": 0.1,
-        "in_walk_radius": false
-      },
-      {
         "lat": 50.4112713,
         "lon": 25.7643986,
         "name": "Nvk \"Dnz-Znz\"",
@@ -333,6 +323,16 @@
         "type": "school",
         "weight": 0.642,
         "in_walk_radius": true
+      },
+      {
+        "lat": 50.4080541,
+        "lon": 25.7568538,
+        "name": "Dubensʹka Spetsialʹna Shkola-Internat",
+        "rating": 0,
+        "reviews": 0,
+        "type": "school",
+        "weight": 0.1,
+        "in_walk_radius": false
       },
       {
         "lat": 50.407985,
@@ -425,7 +425,7 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-03-31T10:09:50.228904",
+    "collected_at": "2026-03-31T10:13:19.027787",
     "population_walk": 3089,
     "population_car": 8350,
     "population_heatmap": [
@@ -468,7 +468,7 @@
     "weekend": 27,
     "walk_radius": 500,
     "car_radius": 1000,
-    "walk_places_count": 39,
+    "walk_places_count": 37,
     "car_places_count": 44,
     "heatmap_points": [
       {
@@ -792,16 +792,6 @@
         "in_walk_radius": true
       },
       {
-        "lat": 50.3980249,
-        "lon": 25.7579445,
-        "name": "Zaliznychna",
-        "rating": 0,
-        "reviews": 0,
-        "type": "school",
-        "weight": 0.1,
-        "in_walk_radius": true
-      },
-      {
         "lat": 50.3956154,
         "lon": 25.7636348,
         "name": "School №5",
@@ -810,6 +800,16 @@
         "type": "school",
         "weight": 0.1,
         "in_walk_radius": false
+      },
+      {
+        "lat": 50.3980249,
+        "lon": 25.7579445,
+        "name": "Zaliznychna",
+        "rating": 0,
+        "reviews": 0,
+        "type": "school",
+        "weight": 0.1,
+        "in_walk_radius": true
       },
       {
         "lat": 50.3982523,
@@ -912,7 +912,7 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-03-31T10:10:00.357114",
+    "collected_at": "2026-03-31T10:13:28.807160",
     "population_walk": 1358,
     "population_car": 5486,
     "population_heatmap": [
