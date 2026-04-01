@@ -385,6 +385,13 @@ const POI_LAYERS = [
   {key:'cinemas',      label:'Кінотеатри',         color:'#9b59b6', r:6,  group:'generators'},
   {key:'sports',       label:'Спорт',              color:'#16a085', r:6,  group:'generators'},
   {key:'parks',        label:'Парки',              color:'#2ecc71', r:6,  group:'generators'},
+  {key:'churches',     label:'Церкви / богослужіння', color:'#8e6dbf', r:5, group:'generators'},
+  {key:'colleges',     label:'Коледжі / ліцеї',   color:'#e08e2a', r:6,  group:'generators'},
+  {key:'bus_stations', label:'Автостанції',        color:'#1565c0', r:7,  group:'generators', big:true},
+  {key:'beauty',       label:'Побутові послуги',   color:'#e91e8c', r:4,  group:'generators'},
+  {key:'bank_branches',label:'Банківські відділення', color:'#00796b', r:5, group:'generators'},
+  {key:'retail_shops', label:'Дрібна роздрібна торгівля', color:'#f57c00', r:4, group:'generators'},
+  {key:'admin',        label:'Адмін. будівлі / ЦНАП', color:'#37474f', r:6, group:'generators'},
   {key:'cnap',         label:'ЦНАП / держ.',       color:'#2c3e50', r:7,  group:'generators', big:true},
   {key:'govt',         label:'Адмін. будівлі',     color:'#34495e', r:6,  group:'generators'},
   {key:'post',         label:'Пошта',              color:'#7f8c8d', r:5,  group:'generators'},
@@ -437,6 +444,17 @@ let activeLayers = new Set(POI_LAYERS.map(l=>l.key));
 // ─── INIT ────────────────────────────────────
 function init() {
   buildWeightsUI();
+
+  // Очищаємо застарілі кешовані результати
+  try {
+    const saved = JSON.parse(localStorage.getItem('tc_saved_analyses') || '[]');
+    const fresh = saved.filter(e => e.score_version === SCORE_VERSION);
+    if (fresh.length !== saved.length) {
+      localStorage.setItem('tc_saved_analyses', JSON.stringify(fresh));
+      console.log(`Очищено ${saved.length - fresh.length} застарілих аналізів (стара версія скорингу)`);
+    }
+  } catch(e) { localStorage.removeItem('tc_saved_analyses'); }
+
   addLoc('Локація 1','50.3936','30.6193');
   addLoc('Локація 2','50.5197','30.6100');
   lmap = L.map('map').setView([50.45,30.52],12);
@@ -623,9 +641,23 @@ node["amenity"="post_office"](${A});
 node["amenity"="townhall"](${A});
 node["amenity"="police"](${A});
 node["amenity"="community_centre"](${A});
+node["amenity"="place_of_worship"](${A});
+node["amenity"="college"](${A});
+node["amenity"="bus_station"](${A});
+node["shop"~"hairdresser|beauty|massage|cosmetics|laundry|dry_cleaning|tailor"](${A});
+node["amenity"~"beauty_salon|nail_salon"](${A});
+node["amenity"="bank"](${A});
 node["office"="government"](${A});
 node["office"="administrative"](${A});
+node["office"="public_administration"](${A});
+node["amenity"="public_building"](${A});
+node["building"="public"](${A});
 node["office"~"company|it|coworking"](${A});
+node["shop"~"clothes|shoes|electronics|furniture|hardware|florist|optician|sports|toys|books|jewelry|stationery"](${A});
+way["amenity"="college"](${A});
+way["amenity"="place_of_worship"](${A});
+way["office"="government"](${A});
+way["building"="public"](${A});
 node["shop"="mall"](${A});
 node["shop"="supermarket"](${A});
 node["shop"="hypermarket"](${A});
@@ -707,6 +739,20 @@ async function fetchOSM(lat, lon, radius) {
     post_offices:     cnt('amenity','post_office'),
     townhalls:        cnt('amenity','townhall'),
     community:        cnt('amenity','community_centre'),
+    churches:         cnt('amenity','place_of_worship'),
+    colleges:         cnt('amenity','college'),
+    bus_stations:     cnt('amenity','bus_station'),
+    beauty_services:  els.filter(e=>e.tags&&(
+                        /hairdresser|beauty|massage|cosmetics|laundry|dry_cleaning|tailor/.test(e.tags.shop||'')||
+                        /beauty_salon|nail_salon/.test(e.tags.amenity||'')
+                      )).length,
+    bank_branches:    cnt('amenity','bank'),
+    retail_shops:     els.filter(e=>e.tags&&/clothes|shoes|electronics|furniture|hardware|florist|optician|sports|toys|books|jewelry|stationery/.test(e.tags.shop||'')).length,
+    admin_buildings:  els.filter(e=>{
+                        const tags=e.tags||{};
+                        return tags.office==='public_administration'||tags.amenity==='public_building'||
+                               tags.building==='public'||tags.office==='administrative';
+                      }).length,
     shopping_malls:   cnt('shop','mall'),
     supermarkets:     cnt('shop','supermarket'),
     hypermarkets:     cnt('shop','hypermarket'),
@@ -743,6 +789,13 @@ async function fetchOSM(lat, lon, radius) {
       malls:        coords(e=>e.tags?.shop==='mall'),
       supermarkets: coords(e=>e.tags?.shop==='supermarket'||e.tags?.shop==='hypermarket'),
       dept_stores:  coords(e=>e.tags?.shop==='department_store'),
+      churches:     coords(e=>e.tags?.amenity==='place_of_worship'),
+      colleges:     coords(e=>e.tags?.amenity==='college'),
+      bus_stations: coords(e=>e.tags?.amenity==='bus_station'),
+      beauty:       coords(e=>/hairdresser|beauty|massage|cosmetics|laundry|dry_cleaning|tailor/.test(e.tags?.shop||'')||/beauty_salon|nail_salon/.test(e.tags?.amenity||'')),
+      bank_branches:coords(e=>e.tags?.amenity==='bank'),
+      retail_shops: coords(e=>/clothes|shoes|electronics|furniture|hardware|florist|optician|sports|toys|books|jewelry|stationery/.test(e.tags?.shop||'')),
+      admin:        coords(e=>e.tags?.office==='public_administration'||e.tags?.amenity==='public_building'||e.tags?.building==='public'||e.tags?.office==='administrative'),
     }
   };
 }
@@ -782,9 +835,11 @@ function computeRaw(osm, traffic, lat, lon, cityCenter) {
     traffic:     traffic ? traffic.traffic_score * 10 : 50, // 0-100, вищий = менше заторів
     parking:     osm.parking_lots*3+osm.parking_garages*5,
     population:  osm.residential*3+osm.amenities+osm.restaurants*2+osm.banks*2+osm.pharmacies*2,
-    generators:  osm.schools*4+osm.universities*6+osm.offices*3+osm.offices_node*2+
+    generators:  osm.schools*4+osm.universities*6+osm.colleges*3+osm.offices*3+osm.offices_node*2+
                  osm.markets*8+osm.hospitals*5+osm.sports*3+osm.cinemas*4+osm.hotels*2+
-                 osm.cnap_count*6+osm.post_offices*2+osm.townhalls*4+osm.community*3+osm.parks*3,
+                 osm.cnap_count*6+osm.admin_buildings*4+osm.post_offices*2+osm.townhalls*4+osm.community*3+osm.parks*3+
+                 osm.churches*2+osm.bus_stations*5+osm.beauty_services*1+
+                 osm.bank_branches*3+osm.retail_shops*1,
     competition: osm.shopping_malls*10+osm.hypermarkets*7+osm.department_stores*5+
                  osm.retail_parks*4+osm.supermarkets*2,
     terrain:     50,
@@ -982,6 +1037,10 @@ function renderPopularTimesTab() {
   });
 }
 
+// Версія алгоритму скорингу. Збільшуємо при кожній зміні формули —
+// це автоматично інвалідує старі кешовані результати в localStorage.
+const SCORE_VERSION = 3;
+
 // ─── АБСОЛЮТНІ ПОРОГИ СКОРИНГУ ───────────────
 // raw-значення що відповідає 10/10 для кожної метрики.
 // Відкалібровано для українських міст, радіус аналізу ~1-1.5 км.
@@ -993,7 +1052,7 @@ const SCORE_CAPS = {
   traffic:      100,  // HERE score 0–100 (завжди в цьому діапазоні)
   parking:       45,  // ~15 парковок * 3
   population:   200,  // щільність POI та житла
-  generators:   100,  // школи, лікарні, ринки, офіси
+  generators:   180,  // розширена формула: школи, лікарні, ринки, банки, церкви, адмін тощо
   competition:   30,  // інвертована: 3 ТЦ*10 = насичений ринок
   terrain:      100,  // рельєф (raw=50 за замовч → ~5.5)
   accessibility: 100, // від центру (raw 5–100 залежно від відстані)
@@ -1586,8 +1645,12 @@ function renderRaw() {
      keys:['motorways','primary_roads','secondary_roads','tertiary_roads','parking_lots','parking_garages'],
      labels:['Магістралі','Головні вулиці','Другорядні','Третьорядні','Паркінги','Паркінг-гаражі']},
     {title:'🏫 Генератори трафіку',
-     keys:['schools','universities','offices_node','markets','hospitals','cinemas','sports','parks','cnap_count','post_offices','townhalls','community'],
-     labels:['Школи','Університети','Офіси','Ринки','Лікарні','Кіно/театри','Спорт','Парки','ЦНАП/держ.','Пошта','Міськрада','Громад. центри']},
+     keys:['schools','colleges','universities','hospitals','markets','bus_stations','churches',
+           'cinemas','sports','parks','cnap_count','admin_buildings','townhalls','community',
+           'post_offices','bank_branches','beauty_services','retail_shops','hotels'],
+     labels:['Школи','Коледжі / ліцеї','Університети','Лікарні','Ринки','Автостанції','Церкви / богослужіння',
+             'Кіно / театри','Спорт','Парки','ЦНАП / держ. послуги','Адмін. будівлі','Міськради','Громад. центри',
+             'Пошта','Банківські відділення','Побутові послуги','Дрібна роздрібна торг.','Готелі']},
     {title:'🏘️ Населеність',
      keys:['residential','amenities','restaurants','banks','pharmacies','hotels'],
      labels:['Жит. квартали','Всі POI','Кафе/ресторани','Банки/ATM','Аптеки','Готелі']},
@@ -1624,6 +1687,7 @@ function saveResults() {
   const entry = {
     id: Date.now(),
     date: new Date().toLocaleString('uk-UA'),
+    score_version: SCORE_VERSION,
     radii: getRadii(),
     locations: results.map(r => ({
       name: r.name, lat: r.lat, lon: r.lon,
@@ -1688,13 +1752,27 @@ function loadSavedAnalysis(id) {
   const entry = saved.find(e => e.id === id);
   if (!entry) return;
 
-  // Відновлюємо локації
+  // Відновлюємо локації завжди
   locations = entry.locations.map((l, i) => ({
     id: Date.now() + i, name: l.name, lat: String(l.lat), lon: String(l.lon)
   }));
   renderLocs();
 
-  // Показуємо результати
+  // Перевіряємо версію скорингу
+  if (entry.score_version !== SCORE_VERSION) {
+    // Стара версія — скори несумісні, треба перерахувати
+    results = [];
+    document.getElementById('saved-modal').style.display = 'none';
+    switchTab('dashboard');
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#e67e22;color:white;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;max-width:320px;line-height:1.5';
+    toast.innerHTML = '⚠️ Локації відновлено.<br><span style="font-weight:400;font-size:12px">Скори застарілі — натисніть <b>Аналізувати</b> для перерахунку.</span>';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+    return;
+  }
+
+  // Версія актуальна — відновлюємо результати
   results = entry.locations.map(l => ({...l, raw: {}, osm: {}, _poi: {}}));
   renderDash(); renderMap(); renderRaw();
   document.getElementById('saved-modal').style.display = 'none';
