@@ -601,7 +601,7 @@ function renderLocs() {
     const d=document.createElement('div');
     d.className='loc-card';
     d.innerHTML=`
-      ${locations.length>2?`<button class="remove-btn" onclick="removeLoc(${loc.id})">×</button>`:''}
+      ${locations.length>1?`<button class="remove-btn" onclick="removeLoc(${loc.id})">×</button>`:''}
       <div class="loc-num" style="background:${col}">${i+1}</div>
       <input placeholder="Назва локації" value="${loc.name}" oninput="locations[${i}].name=this.value;renderPedestrianInputs()">
       <div class="coords2">
@@ -1092,7 +1092,7 @@ function scoreAll(res) {
 // ─── АНАЛІЗ ──────────────────────────────────
 async function runAnalysis() {
   const valid=locations.filter(l=>l.name&&l.lat&&l.lon);
-  if(valid.length<2){alert('Введіть мінімум 2 локації');return;}
+  if(valid.length<1){alert('Введіть мінімум 1 локацію');return;}
   const radii=getRadii();
   const btn=document.getElementById('btn-run');
   btn.disabled=true; btn.textContent='Аналізую...';
