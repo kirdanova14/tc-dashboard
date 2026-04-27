@@ -1,17 +1,17 @@
 {
   "_meta": {
-    "generated": "2026-04-27T07:57:32.881427",
-    "radius_walk": 400,
+    "generated": "2026-04-27T08:00:44.851572",
+    "radius_walk": 500,
     "radius_car": 1000
   },
   "Новий Розділ ринок": {
-    "peak": 32,
-    "morning": 19,
-    "evening": 27,
-    "weekend": 28,
-    "walk_radius": 400,
+    "peak": 31,
+    "morning": 18,
+    "evening": 26,
+    "weekend": 27,
+    "walk_radius": 500,
     "car_radius": 1000,
-    "walk_places_count": 30,
+    "walk_places_count": 34,
     "car_places_count": 46,
     "heatmap_points": [
       {
@@ -182,7 +182,7 @@
         "reviews": 3,
         "type": "transit_station",
         "weight": 0.555,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 49.470232,
@@ -192,7 +192,7 @@
         "reviews": 0,
         "type": "transit_station",
         "weight": 0.1,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 49.46809699999999,
@@ -222,7 +222,7 @@
         "reviews": 487,
         "type": "market",
         "weight": 1.0,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 49.47194380000001,
@@ -282,7 +282,7 @@
         "reviews": 0,
         "type": "school",
         "weight": 0.1,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 49.4705699,
@@ -422,7 +422,7 @@
         "reviews": 0,
         "type": "bank",
         "weight": 0.1,
-        "in_walk_radius": false
+        "in_walk_radius": true
       },
       {
         "lat": 49.4692662,
@@ -475,8 +475,8 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-04-27T07:57:40.758528",
-    "population_walk": 0,
+    "collected_at": "2026-04-27T08:00:53.429911",
+    "population_walk": 1764,
     "population_car": 4688,
     "population_heatmap": [
       {
@@ -489,7 +489,7 @@
         "lat": 49.47094,
         "lon": 24.15299,
         "pop": 1764,
-        "in_walk": false
+        "in_walk": true
       },
       {
         "lat": 49.4631,
