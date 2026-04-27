@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-04-27T07:38:31.893838",
+    "generated": "2026-04-27T07:53:53.796942",
     "radius_walk": 400,
     "radius_car": 1000
   },
@@ -475,7 +475,7 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-04-27T07:38:40.594856",
+    "collected_at": "2026-04-27T07:54:03.220373",
     "population_walk": 4179,
     "population_car": 4688,
     "population_heatmap": [
@@ -962,7 +962,7 @@
         "in_walk_radius": false
       }
     ],
-    "collected_at": "2026-04-27T07:38:48.382001",
+    "collected_at": "2026-04-27T07:54:11.026767",
     "population_walk": 4592,
     "population_car": 4961,
     "population_heatmap": [
