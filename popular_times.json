@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-04-27T07:21:54.454456",
+    "generated": "2026-04-27T07:22:52.793574",
     "radius_walk": 400,
     "radius_car": 1000
   },
@@ -475,7 +475,7 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-04-27T07:22:03.452792",
+    "collected_at": "2026-04-27T07:23:00.177746",
     "population_walk": 0,
     "population_car": 4688,
     "population_heatmap": [
