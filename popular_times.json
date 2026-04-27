@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "generated": "2026-04-27T07:56:29.046039",
+    "generated": "2026-04-27T07:57:32.881427",
     "radius_walk": 400,
     "radius_car": 1000
   },
@@ -475,21 +475,21 @@
         "in_walk_radius": true
       }
     ],
-    "collected_at": "2026-04-27T07:56:37.263962",
-    "population_walk": 4179,
+    "collected_at": "2026-04-27T07:57:40.758528",
+    "population_walk": 0,
     "population_car": 4688,
     "population_heatmap": [
       {
         "lat": 49.46608,
         "lon": 24.14273,
         "pop": 1886,
-        "in_walk": true
+        "in_walk": false
       },
       {
         "lat": 49.47094,
         "lon": 24.15299,
         "pop": 1764,
-        "in_walk": true
+        "in_walk": false
       },
       {
         "lat": 49.4631,
@@ -501,7 +501,7 @@
         "lat": 49.47392,
         "lon": 24.14086,
         "pop": 529,
-        "in_walk": true
+        "in_walk": false
       },
       {
         "lat": 49.47878,
